@@ -2,6 +2,7 @@
 __pycache__/
 
 # Project files
+config.ini
 .idea/
 *.log
 venv

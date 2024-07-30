@@ -2,6 +2,7 @@
 __pycache__/
 
 # Project files
+token.txt
 data.db
 config.ini
 .idea/

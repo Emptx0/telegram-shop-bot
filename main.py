@@ -12,6 +12,7 @@ import sqlite3
 
 from configuration import Configuration
 import user as usr
+import reply_markups
 
 
 config = configparser.ConfigParser()
@@ -36,10 +37,15 @@ async def main():
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user = usr.User(message.chat.id)
+    markup_start = reply_markups.get_markup_default()
+
+    if user.is_admin():
+        markup_start = reply_markups.get_markup_admin()
 
     await bot.send_message(
         chat_id=message.chat.id,
-        text="<b>Welcome to test telegram shop!</b>",
+        text="<b>Welcome to telegram test shop!</b>",
+        reply_markup=markup_start
     )
 
 

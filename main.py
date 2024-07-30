@@ -13,7 +13,7 @@ import sqlite3
 from configuration import Configuration
 import user as usr
 import reply_markups
-
+import text_template as text
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -37,16 +37,61 @@ async def main():
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user = usr.User(message.chat.id)
-    markup_start = reply_markups.get_markup_default()
-
-    if user.is_admin():
-        markup_start = reply_markups.get_markup_admin()
+    markup_start = reply_markups.get_markup_main(user)
 
     await bot.send_message(
         chat_id=message.chat.id,
-        text="<b>Welcome to telegram test shop!</b>",
+        text=text.greeting,
         reply_markup=markup_start
     )
+
+
+async def update_menu_text(message: types.Message, markup, msg_text):
+    await message.edit_text(
+        msg_text,
+        reply_markup=markup
+    )
+
+
+@dp.callback_query(F.data.startswith("main_"))
+async def callbacks_main(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "profile":
+        markup = reply_markups.profile_markup(usr.User(callback.from_user.id))
+        msg_text = f"Hi, <b>{callback.from_user.first_name}</b>!"
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "adminPanel":
+        markup = reply_markups.admin_markup()
+        msg_text = text.admin_panel
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("admin_"))
+async def callbacks_admin_panel(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "back":
+        markup = reply_markups.get_markup_main(usr.User(callback.from_user.id))
+        msg_text = text.greeting
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("profile_"))
+async def callbacks_profile(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "back":
+        markup = reply_markups.get_markup_main(usr.User(callback.from_user.id))
+        msg_text = text.greeting
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
 
 
 if __name__ == "__main__":

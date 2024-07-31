@@ -8,7 +8,7 @@ def create_config(token, main_admin_id, config_path="config.ini"):
     DEFAULT_CONFIG_TEXT = f"""[settings]
 token = {token}
 main_admin_id = {main_admin_id}
-    """
+"""
     with open(config_path, "w") as config:
         config.write(DEFAULT_CONFIG_TEXT)
 

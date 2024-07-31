@@ -13,7 +13,8 @@ import sqlite3
 from configuration import Configuration
 import user as usr
 import reply_markups
-import text_template as text
+import text_templates as tt
+
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -30,10 +31,6 @@ bot = Bot(
 dp = Dispatcher(storage=MemoryStorage())
 
 
-async def main():
-    await dp.start_polling(bot)
-
-
 @dp.message(Command("start"))
 async def start(message: types.Message):
     user = usr.User(message.chat.id)
@@ -41,7 +38,7 @@ async def start(message: types.Message):
 
     await bot.send_message(
         chat_id=message.chat.id,
-        text=text.greeting,
+        text=tt.greeting,
         reply_markup=markup_start
     )
 
@@ -64,7 +61,7 @@ async def callbacks_main(callback: types.CallbackQuery):
 
     if action == "adminPanel":
         markup = reply_markups.admin_markup()
-        msg_text = text.admin_panel
+        msg_text = tt.admin_panel
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
@@ -74,9 +71,15 @@ async def callbacks_main(callback: types.CallbackQuery):
 async def callbacks_admin_panel(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
 
+    if action == "userManagement":
+        await callback.message.edit_text(
+            text=tt.user_management+"\n\nEnter user id you want to manage:",
+            reply_markup=reply_markups.back_button_markup
+        )
+
     if action == "back":
         markup = reply_markups.get_markup_main(usr.User(callback.from_user.id))
-        msg_text = text.greeting
+        msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
@@ -88,7 +91,19 @@ async def callbacks_profile(callback: types.CallbackQuery):
 
     if action == "back":
         markup = reply_markups.get_markup_main(usr.User(callback.from_user.id))
-        msg_text = text.greeting
+        msg_text = tt.greeting
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
+
+
+@dp.callback_query(F.data.startswith("userManagement_"))
+async def callbacks_profile(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "back":
+        markup = reply_markups.admin_markup()
+        msg_text = tt.admin_panel
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
@@ -96,4 +111,4 @@ async def callbacks_profile(callback: types.CallbackQuery):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(main())
+    asyncio.run(dp.start_polling(bot))

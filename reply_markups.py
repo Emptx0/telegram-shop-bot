@@ -1,30 +1,34 @@
 from aiogram import types
 
-import text_template as text
+import text_templates as tt
 import user as usr
 
 # Main menu keyboard
 buttons = [
-    [types.InlineKeyboardButton(text=text.catalogue, callback_data="main_catalogue")],
-    [types.InlineKeyboardButton(text=text.profile, callback_data="main_profile")],
-    [types.InlineKeyboardButton(text=text.cart, callback_data="main_cart")]
+    [types.InlineKeyboardButton(text=tt.catalogue, callback_data="main_catalogue")],
+    [types.InlineKeyboardButton(text=tt.profile, callback_data="main_profile")],
+    [types.InlineKeyboardButton(text=tt.cart, callback_data="main_cart")]
 ]
-admin_panel_button = [[types.InlineKeyboardButton(text=text.admin_panel, callback_data="main_adminPanel")]]
-view_orders_button = [[types.InlineKeyboardButton(text=text.view_orders, callback_data="main_viewOrders")]]
+admin_panel_button = [[types.InlineKeyboardButton(text=tt.admin_panel, callback_data="main_adminPanel")]]
+view_orders_button = [[types.InlineKeyboardButton(text=tt.view_orders, callback_data="main_viewOrders")]]
 
 # Admin Panel keyboard
 admin_panel_buttons = [
-    [types.InlineKeyboardButton(text=text.item_management, callback_data="admin_itemManagement")],
-    [types.InlineKeyboardButton(text=text.user_management, callback_data="admin_userManagement")],
-    [types.InlineKeyboardButton(text=text.back, callback_data="admin_back")]
+    [types.InlineKeyboardButton(text=tt.item_management, callback_data="admin_itemManagement")],
+    [types.InlineKeyboardButton(text=tt.user_management, callback_data="admin_userManagement")],
+    [types.InlineKeyboardButton(text=tt.back, callback_data="admin_back")]
 ]
 
 # My Profile keyboard
 profile_buttons = [
-    [types.InlineKeyboardButton(text=text.my_orders, callback_data="profile_orders")],
-    [types.InlineKeyboardButton(text=text.cancel_order, callback_data="profile_cancelOrder")],
-    [types.InlineKeyboardButton(text=text.back, callback_data="profile_back")]
+    [types.InlineKeyboardButton(text=tt.my_orders, callback_data="profile_orders")],
+    [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
+    [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
 ]
+
+# Admin Panel/User Management back button
+back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="userManagement_back")]]
+back_button_markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
 
 
 # /start

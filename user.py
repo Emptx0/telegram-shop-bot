@@ -1,3 +1,4 @@
+from aiogram.fsm.state import StatesGroup, State
 import sqlite3
 
 from configuration import Configuration
@@ -5,6 +6,10 @@ from configuration import Configuration
 connection = sqlite3.connect('data.db')
 cursor = connection.cursor()
 config = Configuration()
+
+
+class AdminStates(StatesGroup):
+    choosing_user = State()
 
 
 class User:

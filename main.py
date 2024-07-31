@@ -1,4 +1,6 @@
 import asyncio
+import configparser
+import sqlite3
 import logging
 
 from aiogram import Bot, Dispatcher, types, F
@@ -6,9 +8,8 @@ from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.bot import DefaultBotProperties
-
-import configparser
-import sqlite3
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import StatesGroup,  State
 
 from configuration import Configuration
 import user as usr
@@ -67,22 +68,34 @@ async def callbacks_main(callback: types.CallbackQuery):
     await callback.answer()
 
 
+# Admin calls
 @dp.callback_query(F.data.startswith("admin_"))
-async def callbacks_admin_panel(callback: types.CallbackQuery):
+async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
 
     if action == "userManagement":
-        await callback.message.edit_text(
-            text=tt.user_management+"\n\nEnter user id you want to manage:",
-            reply_markup=reply_markups.back_button_markup
-        )
+        markup = reply_markups.back_button_markup
+        msg_text = tt.user_management+"\n\nEnter user id you want to manage:"
+        await state.set_state(usr.AdminStates.choosing_user)
+        await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
         markup = reply_markups.get_markup_main(usr.User(callback.from_user.id))
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
+        await state.clear()
 
     await callback.answer()
+
+
+@dp.message(usr.AdminStates.choosing_user, F.text)
+async def user_chosen(message: types.Message, state: FSMContext):
+    markup = reply_markups.back_button_markup
+    msg_text = (f"User id: <b>{message.text}</b>\n"
+                f"Status: %s" % ("Admin" if usr.User(message.text).is_admin() else
+                                 "Manager" if usr.User(message.text).is_manager() else "None"))
+    await update_menu_text(message, markup, msg_text)                                             # oshibochka tyt
+    await state.clear()
 
 
 @dp.callback_query(F.data.startswith("profile_"))

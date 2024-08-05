@@ -33,6 +33,9 @@ class User:
     def is_admin(self):
         return self.__user_list()[1] == 1
 
+    def is_main_admin(self):
+        return self.__user_id == config.get_main_admin_id()
+
     def set_admin(self, value):
         cursor.execute("UPDATE users SET is_admin=? WHERE user_id = ?", [value, self.get_id()])
 

@@ -13,6 +13,13 @@ back = "⬅️ Back"
 item_management = "📦 Item Management"
 user_management = "🧍 User Management"
 
+# Admin panel/User management
+make_admin = "🔴 Give Admin Role"
+make_manager = "🔵 Give Manager Role"
+
+remove_admin = "🔴 Remove Admin Role"
+remove_manager = "🔵 remove Manager Role"
+
 # Manager panel
 view_orders = "📂 View Orders"
 

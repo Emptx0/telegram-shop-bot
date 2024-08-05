@@ -32,7 +32,9 @@ dp = Dispatcher(storage=MemoryStorage())
 
 
 @dp.message(Command("start"))
-async def start(message: types.Message):
+async def start(message: types.Message, state: FSMContext):
+    await state.set_state(usr.States.menu)
+
     user = usr.User(message.chat.id)
     markup = rm.get_markup_main(user)
 
@@ -41,6 +43,11 @@ async def start(message: types.Message):
         text=tt.greeting,
         reply_markup=markup
     )
+
+
+@dp.message(usr.States.menu, F.text)
+async def chat_filter(message: types.Message):
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
 async def update_menu_text(message: types.Message, markup, msg_text):
@@ -78,20 +85,20 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
     if action == "userManagement":
         markup = rm.user_management_markup(back_button=True)
         msg_text = tt.user_management+"\n\nEnter user id you want to manage:"
-        await state.set_state(usr.AdminStates.choosing_user)
+        await state.set_state(usr.States.choosing_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
         markup = rm.get_markup_main(usr.User(callback.from_user.id))
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
-        await state.clear()
+        await state.set_state(usr.States.menu)
 
     await callback.answer()
 
 
-@dp.message(usr.AdminStates.choosing_user, F.text)
-async def user_chosen(message: types.Message, state: FSMContext):
+@dp.message(usr.States.choosing_user, F.text)
+async def user_management(message: types.Message, state: FSMContext):
     if usr.user_exists(message.text):
         markup = rm.user_management_markup(usr.User(message.text))
         msg_text = (f"User id: <b>{message.text}</b>\n"
@@ -104,7 +111,7 @@ async def user_chosen(message: types.Message, state: FSMContext):
             text=msg_text,
             reply_markup=markup
         )
-        await state.clear()
+        await state.set_state(usr.States.menu)
     else:
         markup = rm.user_management_markup(back_button=True)
         await bot.delete_message(message.chat.id, message.message_id)
@@ -115,9 +122,13 @@ async def user_chosen(message: types.Message, state: FSMContext):
         )
 
 
-@dp.callback_query(F.data.startswith("userManagement_"))
-async def callbacks_profile(callback: types.CallbackQuery):
+@dp.callback_query(F.data.startswith("um_"))
+async def callbacks_user_management(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
+
+    if action == "makeAdmin":
+        selected_user = usr.User(callback.data.split("_")[2])
+        selected_user.set_admin(True)                                              # Добавить апдейт сообщения
 
     if action == "back":
         markup = rm.admin_markup()

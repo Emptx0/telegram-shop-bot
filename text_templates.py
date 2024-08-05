@@ -18,7 +18,7 @@ make_admin = "🔴 Give Admin Role"
 make_manager = "🔵 Give Manager Role"
 
 remove_admin = "🔴 Remove Admin Role"
-remove_manager = "🔵 remove Manager Role"
+remove_manager = "🔵 Remove Manager Role"
 
 # Manager panel
 view_orders = "📂 View Orders"

@@ -52,30 +52,30 @@ def admin_markup():
 def user_management_markup(user: usr.User = None, back_button=False):
     if back_button or user.is_main_admin():
         user_management_buttons = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data="userManagement_back")]
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 
     elif user.is_admin():
         user_management_buttons = [
-            [types.InlineKeyboardButton(text=tt.remove_admin, callback_data=f"removeAdmin_{user.get_id()}")],
-            [types.InlineKeyboardButton(text=tt.back, callback_data="userManagement_back")]
+            [types.InlineKeyboardButton(text=tt.remove_admin, callback_data=f"um_removeAdmin_{user.get_id()}")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 
     elif user.is_manager():
         user_management_buttons = [
-            [types.InlineKeyboardButton(text=tt.make_admin, callback_data=f"makeAdmin_{user.get_id()}")],
-            [types.InlineKeyboardButton(text=tt.remove_manager, callback_data=f"removeManager_{user.get_id()}")],
-            [types.InlineKeyboardButton(text=tt.back, callback_data="userManagement_back")]
+            [types.InlineKeyboardButton(text=tt.make_admin, callback_data=f"um_makeAdmin_{user.get_id()}")],
+            [types.InlineKeyboardButton(text=tt.remove_manager, callback_data=f"um_removeManager_{user.get_id()}")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 
     else:
         user_management_buttons = [
-            [types.InlineKeyboardButton(text=tt.make_admin, callback_data=f"makeAdmin_{user.get_id()}")],
-            [types.InlineKeyboardButton(text=tt.make_manager, callback_data=f"makeManager_{user.get_id()}")],
-            [types.InlineKeyboardButton(text=tt.back, callback_data="userManagement_back")]
+            [types.InlineKeyboardButton(text=tt.make_admin, callback_data=f"um_makeAdmin_{user.get_id()}")],
+            [types.InlineKeyboardButton(text=tt.make_manager, callback_data=f"um_makeManager_{user.get_id()}")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 

@@ -8,7 +8,10 @@ cursor = connection.cursor()
 config = Configuration()
 
 
-class AdminStates(StatesGroup):
+class States(StatesGroup):
+    menu = State()
+
+    # Admin states
     choosing_user = State()
 
 

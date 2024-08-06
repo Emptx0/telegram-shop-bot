@@ -9,8 +9,6 @@ config = Configuration()
 
 
 class States(StatesGroup):
-    menu = State()
-
     # Admin states
     choosing_user = State()
 
@@ -41,12 +39,14 @@ class User:
 
     def set_admin(self, value):
         cursor.execute("UPDATE users SET is_admin=? WHERE user_id = ?", [value, self.get_id()])
+        connection.commit()
 
     def is_manager(self):
         return self.__user_list()[2] == 1
 
     def set_manager(self, value):
         cursor.execute("UPDATE users SET is_manager=? WHERE user_id = ?", [value, self.get_id()])
+        connection.commit()
 
 
 def user_exists(user_id) -> bool:

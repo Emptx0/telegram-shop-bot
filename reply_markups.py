@@ -32,7 +32,6 @@ def profile_markup(user: usr):
         [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
     ]
-
     markup = types.InlineKeyboardMarkup(inline_keyboard=profile_buttons)
     return markup
 
@@ -44,17 +43,21 @@ def admin_markup():
         [types.InlineKeyboardButton(text=tt.user_management, callback_data="admin_userManagement")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="admin_back")]
     ]
-
     markup = types.InlineKeyboardMarkup(inline_keyboard=admin_panel_buttons)
     return markup
 
 
-def user_management_markup(user: usr.User = None, back_button=False):
-    if back_button or user.is_main_admin():
-        user_management_buttons = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-        ]
-        markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
+def user_management_back():
+    back_button = [
+        [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+    return markup
+
+
+def user_management_markup(user: usr.User):
+    if user.is_main_admin():
+        return user_management_back()
 
     elif user.is_admin():
         user_management_buttons = [

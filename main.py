@@ -45,7 +45,6 @@ async def start(message: types.Message, state: FSMContext):
 
 @dp.message(StateFilter(None), F.text)
 async def chat_filter(message: types.Message):
-    print(message.message_id)
     await bot.delete_message(message.chat.id, message.message_id)
 
 
@@ -84,7 +83,7 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
     if action == "userManagement":
         markup = rm.user_management_back()
         msg_text = tt.user_management+"\n\nEnter user id you want to manage:"
-        await state.update_data(message_to_update=callback.message)
+        await state.update_data(pr_message={"id": callback.message.message_id})
         await state.set_state(usr.States.choosing_user)
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -99,7 +98,8 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
 @dp.message(usr.States.choosing_user, F.text)
 async def user_management(message: types.Message, state: FSMContext):
     user_id = message.text
-    message_to_update = await state.get_data()
+    data = await state.get_data()
+    print(data["pr_message"]["id"])
     if usr.user_exists(user_id):
         selected_user = usr.User(user_id)
         markup = rm.user_management_markup(selected_user)
@@ -108,15 +108,14 @@ async def user_management(message: types.Message, state: FSMContext):
                                      "Admin" if selected_user.is_admin() else
                                      "Manager" if selected_user.is_manager() else "Customer"))
         await bot.delete_message(message.chat.id, message.message_id)
-        await update_menu_text(message_to_update, markup, msg_text)
-        '''
+        await bot.delete_message(message.chat.id, data["pr_message"]["id"])
         await bot.send_message(
             chat_id=message.chat.id,
             text=msg_text,
             reply_markup=markup
         )
-        '''
         await state.clear()
+
     else:
         markup = rm.user_management_back()
         await bot.delete_message(message.chat.id, message.message_id)

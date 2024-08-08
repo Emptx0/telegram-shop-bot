@@ -47,17 +47,32 @@ def admin_markup():
     return markup
 
 
-def user_management_back():
-    back_button = [
-        [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-    ]
-    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
-    return markup
+def select_user_markup(user: usr.User):
+    if user.is_main_admin():
+        select_user_buttons = [
+            [types.InlineKeyboardButton(text=tt.get_admins_list, callback_data="um_getAdmins")],
+            [types.InlineKeyboardButton(text=tt.get_manager_list, callback_data="um_getManagers")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=select_user_buttons)
+        return markup
+
+    elif user.is_admin():
+        select_user_buttons = [
+            [types.InlineKeyboardButton(text=tt.get_manager_list, callback_data="um_getManagers")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=select_user_buttons)
+        return markup
 
 
 def user_management_markup(user: usr.User):
     if user.is_main_admin():
-        return user_management_back()
+        user_management_buttons = [
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
+        return markup
 
     elif user.is_admin():
         user_management_buttons = [

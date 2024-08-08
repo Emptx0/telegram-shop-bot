@@ -33,7 +33,7 @@ dp = Dispatcher(storage=MemoryStorage())
 
 @dp.message(Command("start"))
 async def start(message: types.Message, state: FSMContext):
-    user = usr.User(message.chat.id)
+    user = usr.User(message.chat.id, message.from_user.username)
     markup = rm.get_markup_main(user)
 
     await bot.send_message(
@@ -81,7 +81,7 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
     action = callback.data.split("_")[1]
 
     if action == "userManagement":
-        markup = rm.user_management_back()
+        markup = rm.select_user_markup(usr.User(callback.from_user.id))
         msg_text = tt.user_management+"\n\nEnter user id you want to manage:"
         await state.update_data(pr_message={"id": callback.message.message_id})
         await state.set_state(usr.States.choosing_user)
@@ -102,10 +102,10 @@ async def user_management(message: types.Message, state: FSMContext):
     if usr.user_exists(user_id):
         selected_user = usr.User(user_id)
         markup = rm.user_management_markup(selected_user)
-        msg_text = (f"User id: {selected_user.get_id()}\n"
-                    f"Status: %s" % ("Main Admin" if selected_user.get_id() == config.get_main_admin_id() else
-                                     "Admin" if selected_user.is_admin() else
-                                     "Manager" if selected_user.is_manager() else "Customer"))
+        msg_text = tt.user_info(
+            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.is_admin(), selected_user.is_manager()
+        )
         await bot.delete_message(message.chat.id, message.message_id)
         await bot.delete_message(message.chat.id, data["pr_message"]["id"])
         await bot.send_message(
@@ -116,7 +116,7 @@ async def user_management(message: types.Message, state: FSMContext):
         await state.clear()
 
     else:
-        markup = rm.user_management_back()
+        markup = rm.select_user_markup(usr.User(message.from_user.id))
         await bot.delete_message(message.chat.id, message.message_id)
         await bot.send_message(
             chat_id=message.chat.id,
@@ -129,16 +129,26 @@ async def user_management(message: types.Message, state: FSMContext):
 async def callbacks_user_management(callback: types.CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
 
+    if action == "getAdmins":
+        cursor.execute('SELECT user_id, username FROM Users WHERE is_admin = ?', (1,))
+        admins_list = cursor.fetchall()
+        print(admins_list)
+
+    if action == "getManagers":
+        cursor.execute('SELECT user_id, username FROM Users WHERE is_manager = ?', (1,))
+        managers_list = cursor.fetchall()
+        print(managers_list)
+
     if action == "makeAdmin":
         selected_user = usr.User(callback.data.split("_")[2])
         selected_user.set_admin(1)
         selected_user.set_manager(0)
 
         markup = rm.user_management_markup(selected_user)
-        msg_text = (f"User id: <b>{selected_user.get_id()}</b>\n"
-                    f"Status: %s" % ("Main Admin" if selected_user.get_id() == config.get_main_admin_id() else
-                                     "Admin" if selected_user.is_admin() else
-                                     "Manager" if selected_user.is_manager() else "Customer"))
+        msg_text = tt.user_info(
+            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.is_admin(), selected_user.is_manager()
+        )
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "removeAdmin":
@@ -146,10 +156,32 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user.set_admin(0)
 
         markup = rm.user_management_markup(selected_user)
-        msg_text = (f"User id: <b>{selected_user.get_id()}</b>\n"
-                    f"Status: %s" % ("Main Admin" if selected_user.get_id() == config.get_main_admin_id() else
-                                     "Admin" if selected_user.is_admin() else
-                                     "Manager" if selected_user.is_manager() else "Customer"))
+        msg_text = tt.user_info(
+            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.is_admin(), selected_user.is_manager()
+        )
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "makeManager":
+        selected_user = usr.User(callback.data.split("_")[2])
+        selected_user.set_manager(1)
+
+        markup = rm.user_management_markup(selected_user)
+        msg_text = tt.user_info(
+            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.is_admin(), selected_user.is_manager()
+        )
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "removeManager":
+        selected_user = usr.User(callback.data.split("_")[2])
+        selected_user.set_manager(0)
+
+        markup = rm.user_management_markup(selected_user)
+        msg_text = tt.user_info(
+            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.is_admin(), selected_user.is_manager()
+        )
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":

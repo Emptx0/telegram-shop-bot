@@ -99,7 +99,6 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
 async def user_management(message: types.Message, state: FSMContext):
     user_id = message.text
     data = await state.get_data()
-    print(data["pr_message"]["id"])
     if usr.user_exists(user_id):
         selected_user = usr.User(user_id)
         markup = rm.user_management_markup(selected_user)

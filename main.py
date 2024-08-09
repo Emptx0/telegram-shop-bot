@@ -12,6 +12,7 @@ from aiogram.fsm.context import FSMContext
 
 from configuration import Configuration
 import user as usr
+import states_handler as sh
 import reply_markups as rm
 import text_templates as tt
 
@@ -61,10 +62,9 @@ async def callbacks_main(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
 
     if action == "profile":
-        markup = rm.profile_markup(usr.User(callback.from_user.id))
-        msg_text = (f"Hi, <b>{callback.from_user.first_name}</b>!\n"
-                    f"Status: %s" % ("Admin" if usr.User(callback.from_user.id).is_admin() else
-                                     "Manager" if usr.User(callback.from_user.id).is_manager() else "Customer"))
+        user = usr.User(callback.from_user.id)
+        markup = rm.profile_markup(user)
+        msg_text = tt.profile_info(callback.from_user.first_name, user.is_main_admin(), user.is_admin(), user.is_manager())
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "adminPanel":
@@ -82,9 +82,10 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
 
     if action == "userManagement":
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = tt.user_management+"\n\nEnter user id you want to manage:"
+        msg_text = f"{tt.user_management}\n\nEnter user id you want to manage:"
+
         await state.update_data(pr_message={"id": callback.message.message_id})
-        await state.set_state(usr.States.choosing_user)
+        await state.set_state(sh.AdminStates.choosing_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
@@ -95,15 +96,16 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
     await callback.answer()
 
 
-@dp.message(usr.States.choosing_user, F.text)
+@dp.message(sh.AdminStates.choosing_user, F.text)
 async def user_management(message: types.Message, state: FSMContext):
     user_id = message.text
     data = await state.get_data()
     if usr.user_exists(user_id):
         selected_user = usr.User(user_id)
-        markup = rm.user_management_markup(selected_user)
+        admin = usr.User(message.from_user.id)
+        markup = rm.user_management_markup(selected_user, admin.is_main_admin())
         msg_text = tt.user_info(
-            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
             selected_user.is_admin(), selected_user.is_manager()
         )
         await bot.delete_message(message.chat.id, message.message_id)
@@ -118,35 +120,52 @@ async def user_management(message: types.Message, state: FSMContext):
     else:
         markup = rm.select_user_markup(usr.User(message.from_user.id))
         await bot.delete_message(message.chat.id, message.message_id)
-        await bot.send_message(
+        await bot.delete_message(message.chat.id, data["pr_message"]["id"])
+        msg = await bot.send_message(
             chat_id=message.chat.id,
             text=f"No registered users found with id <b>{user_id}</b>. Try again.",
             reply_markup=markup
         )
+        await state.update_data(pr_message={"id": msg.message_id})
 
 
 @dp.callback_query(F.data.startswith("um_"))
 async def callbacks_user_management(callback: types.CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
+    admin = usr.User(callback.from_user.id)
 
     if action == "getAdmins":
         cursor.execute('SELECT user_id, username FROM Users WHERE is_admin = ?', (1,))
         admins_list = cursor.fetchall()
-        print(admins_list)
+
+        markup = rm.select_user_markup(usr.User(callback.from_user.id))
+        msg_text = f"{tt.get_admins_list}:\n\n"
+        for user_id, username in admins_list:
+            msg_text += f"{user_id} : @{username}\n"
+        msg_text += "\nEnter user id you want to manage:"
+
+        await update_menu_text(callback.message, markup, msg_text)
 
     if action == "getManagers":
         cursor.execute('SELECT user_id, username FROM Users WHERE is_manager = ?', (1,))
         managers_list = cursor.fetchall()
-        print(managers_list)
+
+        markup = rm.select_user_markup(usr.User(callback.from_user.id))
+        msg_text = f"{tt.get_managers_list}:\n\n"
+        for user_id, username in managers_list:
+            msg_text += f"{user_id} : @{username}\n"
+        msg_text += "\nEnter user id you want to manage:"
+
+        await update_menu_text(callback.message, markup, msg_text)
 
     if action == "makeAdmin":
         selected_user = usr.User(callback.data.split("_")[2])
         selected_user.set_admin(1)
         selected_user.set_manager(0)
 
-        markup = rm.user_management_markup(selected_user)
+        markup = rm.user_management_markup(selected_user, admin.is_main_admin())
         msg_text = tt.user_info(
-            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
             selected_user.is_admin(), selected_user.is_manager()
         )
         await update_menu_text(callback.message, markup, msg_text)
@@ -155,9 +174,9 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user = usr.User(callback.data.split("_")[2])
         selected_user.set_admin(0)
 
-        markup = rm.user_management_markup(selected_user)
+        markup = rm.user_management_markup(selected_user, admin.is_main_admin())
         msg_text = tt.user_info(
-            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
             selected_user.is_admin(), selected_user.is_manager()
         )
         await update_menu_text(callback.message, markup, msg_text)
@@ -166,9 +185,9 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user = usr.User(callback.data.split("_")[2])
         selected_user.set_manager(1)
 
-        markup = rm.user_management_markup(selected_user)
+        markup = rm.user_management_markup(selected_user, admin.is_main_admin())
         msg_text = tt.user_info(
-            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
             selected_user.is_admin(), selected_user.is_manager()
         )
         await update_menu_text(callback.message, markup, msg_text)
@@ -177,9 +196,9 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user = usr.User(callback.data.split("_")[2])
         selected_user.set_manager(0)
 
-        markup = rm.user_management_markup(selected_user)
+        markup = rm.user_management_markup(selected_user, admin.is_main_admin())
         msg_text = tt.user_info(
-            selected_user.get_id(), config.get_main_admin_id(),
+            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
             selected_user.is_admin(), selected_user.is_manager()
         )
         await update_menu_text(callback.message, markup, msg_text)

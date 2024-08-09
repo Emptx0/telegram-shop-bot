@@ -19,8 +19,21 @@ CREATE_USERS_TEXT = """
             "username" TEXT NOT NULL,
             "is_admin" INTEGER,
             "is_manager" INTEGER,
-        "cart" TEXT
+            "cart" TEXT
 )
+"""
+
+
+CREATE_ITEMS_TEXT = """
+        CREATE TABLE "items" (
+            "id" INTEGER,
+            "name" TEXT NOT NULL,
+            "price" FLOAT NOT NULL,
+            "desc" TEXT,
+            "amount" INTEGER,
+            "image_id" INTEGER,
+            PRIMARY KEY("id")
+        )
 """
 
 
@@ -28,6 +41,7 @@ def create_db():
     connection = sqlite3.connect("data.db")
     cursor = connection.cursor()
     cursor.execute(CREATE_USERS_TEXT)
+    cursor.execute(CREATE_ITEMS_TEXT)
     connection.commit()
     connection.close()
 

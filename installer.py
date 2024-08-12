@@ -41,7 +41,7 @@ def create_db():
     connection = sqlite3.connect("data.db")
     cursor = connection.cursor()
     cursor.execute(CREATE_USERS_TEXT)
-    cursor.execute(CREATE_ITEMS_TEXT
+    cursor.execute(CREATE_ITEMS_TEXT)
     connection.commit()
     connection.close()
 

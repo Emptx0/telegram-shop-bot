@@ -18,7 +18,7 @@ class User:
             )
             connection.commit()
 
-    def __user_list(self):
+    def __clist(self):
         cursor.execute("SELECT * FROM users WHERE user_id = ?", [self.get_id()])
         return list(cursor)[0]
 
@@ -26,20 +26,20 @@ class User:
         return self.__user_id
 
     def get_username(self):
-        return self.__user_list()[1]
+        return self.__clist()[1]
 
     def is_main_admin(self):
         return str(self.__user_id) == str(config.get_main_admin_id())
 
     def is_admin(self):
-        return self.__user_list()[2] == 1
+        return self.__clist()[2] == 1
 
     def set_admin(self, value):
         cursor.execute("UPDATE users SET is_admin=? WHERE user_id = ?", [value, self.get_id()])
         connection.commit()
 
     def is_manager(self):
-        return self.__user_list()[3] == 1
+        return self.__clist()[3] == 1
 
     def set_manager(self, value):
         cursor.execute("UPDATE users SET is_manager=? WHERE user_id = ?", [value, self.get_id()])

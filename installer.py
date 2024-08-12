@@ -24,11 +24,21 @@ CREATE_USERS_TEXT = """
 """
 
 
+CREATE_CATS_TEXT = """
+    CREATE TABLE "categories" (
+        "id" INTEGER,
+        "name" TEXT NOT NULL,
+        PRIMARY KEY("id")
+    )
+"""
+
+
 CREATE_ITEMS_TEXT = """
         CREATE TABLE "items" (
             "id" INTEGER,
             "name" TEXT NOT NULL,
             "price" FLOAT NOT NULL,
+            "cat_id" INTEGER NOT NULL,
             "desc" TEXT,
             "amount" INTEGER,
             "image_id" INTEGER,
@@ -37,11 +47,27 @@ CREATE_ITEMS_TEXT = """
 """
 
 
+CREATE_ORDERS_TEXT = """
+    CREATE TABLE "orders" (
+        "order_id" INTEGER,
+        "user_id" INTEGER,
+        "item_list" TEXT,
+        "email_adress" TEXT,
+        "phone_number" TEXT,
+        "home_adress" TEXT,
+        "date" TEXT,
+        "status" INTEGER
+    )
+"""
+
+
 def create_db():
     connection = sqlite3.connect("data.db")
     cursor = connection.cursor()
     cursor.execute(CREATE_USERS_TEXT)
+    cursor.execute(CREATE_CATS_TEXT)
     cursor.execute(CREATE_ITEMS_TEXT)
+    cursor.execute(CREATE_ORDERS_TEXT)
     connection.commit()
     connection.close()
 

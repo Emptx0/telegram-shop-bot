@@ -1,4 +1,4 @@
-from os import system, name, remove, mkdir, rmdir, listdir, environ
+from os import remove, mkdir, rmdir, listdir
 from os.path import exists
 
 import sqlite3

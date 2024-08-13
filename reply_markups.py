@@ -2,6 +2,7 @@ from aiogram import types
 
 import text_templates as tt
 import user as usr
+import category
 
 
 # /start
@@ -44,6 +45,43 @@ def admin_markup():
         [types.InlineKeyboardButton(text=tt.back, callback_data="admin_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=admin_panel_buttons)
+    return markup
+
+
+def item_management_markup(back=False):
+    if back:
+        back_button = [
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+        return markup
+    else:
+        item_management_buttons = [
+            [types.InlineKeyboardButton(text=tt.select_cat, callback_data="im_selectCat")],
+            [types.InlineKeyboardButton(text=tt.create_cat[0], callback_data="im_createCat")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
+        return markup
+
+
+def select_cat_markup():
+    select_cat_buttons = [
+        [types.InlineKeyboardButton(text=tt.get_cats_list, callback_data="im_getCats")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=select_cat_buttons)
+    return markup
+
+
+def cat_management_markup(cat: category.Category):
+    cat_management_buttons = [
+        [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_gatItems_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.rename_cat[0], callback_data=f"im_renameCat_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.delete_cat[0], callback_data=f"im_deleteCat_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=cat_management_buttons)
     return markup
 
 

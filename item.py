@@ -59,6 +59,10 @@ class Item:
     def set_image_id(self, value):
         cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])
 
+    def delete(self):
+        cursor.execute(f"DELETE FROM items WHERE id=?", [self.get_id()])
+        connection.commit()
+
 
 def item_exist(item_id):
     cursor.execute(f"SELECT * FROM items WHERE id=?", [item_id])
@@ -71,6 +75,6 @@ def get_item_list():
 
 
 def create_item(name, price, cat_id, desc, amount, image_id):
-    cursor.execute(f"INSERT INTO items VALUES(?, ?, ?, ?, ?, ?)",
+    cursor.execute(f"INSERT INTO items(name, price, cat_id, desc, amount, image_id) VALUES(?, ?, ?, ?, ?, ?)",
                    [name, price, cat_id, desc, amount, image_id]
                    )

@@ -2,9 +2,9 @@
 __pycache__/
 
 # Project files
-images
-data.db
-config.ini
+src/images
+src/data.db
+src/config.ini
 .idea/
 *.log
 venv

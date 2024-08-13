@@ -15,6 +15,55 @@ class Item:
     def get_id(self):
         return self.__item_id
 
+    def get_name(self):
+        return self.__clist()[1]
+
+    def set_name(self, value):
+        cursor.execute(f"UPDATE items SET name=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
+
+    def get_price(self):
+        return self.__clist()[2]
+
+    def set_price(self, value):
+        cursor.execute(f"UPDATE items SET price=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
+
+    def get_cat(self):
+        return self.__clist()[3]
+
+    def set_cat(self, value):
+        cursor.execute(f"UPDATE items SET cat_id=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
+
+    def get_desc(self):
+        return self.__clist()[4]
+
+    def set_desc(self, value):
+        cursor.execute(f"UPDATE items SET desc=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
+
+    def get_amount(self):
+        return self.__clist()[5]
+
+    def set_amount(self, value):
+        cursor.execute(f"UPDATE items SET amount=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
+
+    def get_image_id(self):
+        return self.__clist()[6]
+
+    def get_image(self):
+        return open("images/" + self.get_image_id(), "rb")
+
+    def set_image_id(self, value):
+        cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])
+
+
+def item_exist(item_id):
+    cursor.execute(f"SELECT * FROM items WHERE id=?", [item_id])
+    return len(list(cursor)) == 1
+
 
 def get_item_list():
     cursor.execute("SELECT * FROM items")

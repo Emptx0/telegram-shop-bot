@@ -101,7 +101,15 @@ if __name__ == "__main__":
                 print("Configuration file has been deleted.")
             create_config(token, main_admin_id)
             print("Configuration file has been created.")
+
+            if exists("images"):
+                for file in listdir("images"):
+                    remove("images/" + file)
+                rmdir("images")
+                print('"images" folder has been deleted.')
+            mkdir("images")
+            print('"images" folder has been created.')
         else:
-            print("Invalid user id.")
+            print("Invalid user ID.")
     else:
         print("Installation was canceled.")

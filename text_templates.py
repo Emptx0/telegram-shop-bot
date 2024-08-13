@@ -24,7 +24,7 @@ remove_manager = "🔵 Remove Manager Role"
 
 
 def user_info(user_id, username, is_main_admin, is_admin, is_manager) -> str:
-    msg_text = (f"User id: <b>{user_id}</b>\n"
+    msg_text = (f"User ID: <b>{user_id}</b>\n"
                 f"Username: @{username}\n"
                 f"Status: %s" % ("Main Admin" if is_main_admin else
                                  "Admin" if is_admin else

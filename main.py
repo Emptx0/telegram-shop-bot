@@ -82,7 +82,7 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
 
     if action == "userManagement":
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = f"{tt.user_management}\n\nEnter user id you want to manage:"
+        msg_text = f"{tt.user_management}\n\nEnter user ID you want to manage:"
 
         await state.update_data(pr_message={"id": callback.message.message_id})
         await state.set_state(sh.AdminStates.choosing_user)
@@ -123,7 +123,7 @@ async def user_management(message: types.Message, state: FSMContext):
         await bot.delete_message(message.chat.id, data["pr_message"]["id"])
         msg = await bot.send_message(
             chat_id=message.chat.id,
-            text=f"No registered users found with id <b>{user_id}</b>. Try again.",
+            text=f"No registered users found with ID <b>{user_id}</b>. Try again.",
             reply_markup=markup
         )
         await state.update_data(pr_message={"id": msg.message_id})
@@ -142,7 +142,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         msg_text = f"{tt.get_admins_list}:\n\n"
         for user_id, username in admins_list:
             msg_text += f"{user_id} : @{username}\n"
-        msg_text += "\nEnter user id you want to manage:"
+        msg_text += "\nEnter user ID you want to manage:"
 
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -154,7 +154,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         msg_text = f"{tt.get_managers_list}:\n\n"
         for user_id, username in managers_list:
             msg_text += f"{user_id} : @{username}\n"
-        msg_text += "\nEnter user id you want to manage:"
+        msg_text += "\nEnter user ID you want to manage:"
 
         await update_menu_text(callback.message, markup, msg_text)
 

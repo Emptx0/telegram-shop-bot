@@ -2,6 +2,7 @@
 __pycache__/
 
 # Project files
+images
 data.db
 config.ini
 .idea/

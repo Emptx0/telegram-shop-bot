@@ -48,4 +48,4 @@ class User:
 
 def user_exists(user_id) -> bool:
     cursor.execute("SELECT * FROM users WHERE user_id = ?", [user_id])
-    return len(cursor.fetchall()) != 0
+    return len(list(cursor)) != 0

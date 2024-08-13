@@ -53,7 +53,6 @@ CREATE_ORDERS_TEXT = """
         "user_id" INTEGER,
         "item_list" TEXT,
         "email_adress" TEXT,
-        "phone_number" TEXT,
         "home_adress" TEXT,
         "date" TEXT,
         "status" INTEGER

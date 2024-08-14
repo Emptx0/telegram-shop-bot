@@ -69,12 +69,13 @@ def item_exist(item_id):
     return len(list(cursor)) == 1
 
 
-def get_item_list():
-    cursor.execute("SELECT * FROM items")
+def get_items_list(cat_id):
+    cursor.execute("SELECT * FROM items WHERE cat_id=?", [cat_id])
     return list(map(Item, [item[0] for item in list(cursor)]))
 
 
-def create_item(name, price, cat_id, desc, amount, image_id):
-    cursor.execute(f"INSERT INTO items(name, price, cat_id, desc, amount, image_id) VALUES(?, ?, ?, ?, ?, ?)",
-                   [name, price, cat_id, desc, amount, image_id]
+def create_item(item_id, name, price, cat_id):
+    cursor.execute(f"INSERT INTO items(id, name, price, cat_id, desc, amount, image_id) VALUES(?, ?, ?, ?, ?, ?, ?)",
+                   [item_id, name, price, cat_id, "None", 0, 0]
                    )
+    connection.commit()

@@ -17,6 +17,7 @@ import states_handler as sh
 import reply_markups as rm
 import text_templates as tt
 import category
+import item as itm
 
 
 configuration = configparser.ConfigParser()
@@ -134,8 +135,46 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         cats_list = cursor.fetchall()
 
         markup = rm.select_cat_markup()
-        msg_text = tt.get_cats(cats_list)
+        msg_text = tt.get_items(cats_list)
 
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "manageItems":
+        cat_id = callback.data.split("_")[2]
+        markup = rm.select_item_markup(cat_id)
+        msg_text = f"{tt.manage_items}\n\nEnter ID of the item you want to manage:"
+
+        await state.update_data(pr_message={"id": callback.message.message_id})
+        await state.set_state(sh.AdminStates.choosing_item)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "getItems":
+        cat_id = callback.data.split("_")[2]
+        cursor.execute('SELECT id, name FROM items WHERE cat_id=?', [cat_id])
+        items_list = cursor.fetchall()
+
+        markup = rm.select_cat_markup()
+        msg_text = tt.get_items(items_list)
+
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "selectItemBack":
+        cat_id = callback.data.split("_")[2]
+
+        cat = category.Category(cat_id)
+        markup = rm.cat_management_markup(cat)
+        msg_text = tt.cat_info(cat.get_id(), cat.get_name())
+
+        await update_menu_text(callback.message, markup, msg_text)
+        await state.clear()
+
+    if action == "addItem":
+        selected_cat_id = callback.data.split("_")[2]
+        markup = rm.cat_management_back()
+        msg_text = f"{tt.add_item[0]}\n\nEnter name of the item you want to add:"
+
+        await state.update_data(pr_message={"id": callback.message.message_id}, cat_id=selected_cat_id)
+        await state.set_state(sh.AdminStates.item_name)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "renameCat":
@@ -160,13 +199,14 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         cats_list = cursor.fetchall()
 
         markup = rm.select_cat_markup()
-        msg_text = tt.get_cats(cats_list)
+        msg_text = tt.get_items(cats_list)
 
         await state.update_data(pr_message={"id": callback.message.message_id})
         await state.set_state(sh.AdminStates.choosing_cat)
         await update_menu_text(callback.message, markup, msg_text)
 
 
+# Category select/add
 @dp.message(sh.AdminStates.choosing_cat, F.text)
 async def cat_management(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -215,6 +255,56 @@ async def cat_creating(message: types.Message, state: FSMContext):
     await state.clear()
 
 
+# Adding an item to a category
+@dp.message(sh.AdminStates.item_name, F.text)
+async def item_name(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+
+    markup = rm.cat_management_back()
+    msg_text = "Enter item price:"
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message"]["id"])
+    msg = await bot.send_message(
+        chat_id=message.chat.id,
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message={"id": msg.message_id}, item_name=message.text)
+    await state.set_state(sh.AdminStates.item_price)
+
+
+@dp.message(sh.AdminStates.item_price, F.text)
+async def item_price(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    price = message.text
+
+    if price.isdigit():
+        itm.create_item(message.message_id, data["item_name"], price, data["cat_id"])
+
+        markup = rm.cat_management_back()
+        msg_text = tt.add_item[1]
+        await bot.delete_message(message.chat.id, message.message_id)
+        await bot.delete_message(message.chat.id, data["pr_message"]["id"])
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=msg_text,
+            reply_markup=markup
+        )
+        await state.clear()
+
+    else:
+        markup = rm.cat_management_back()
+        await bot.delete_message(message.chat.id, message.message_id)
+        await bot.delete_message(message.chat.id, data["pr_message"]["id"])
+        msg = await bot.send_message(
+            chat_id=message.chat.id,
+            text=f"The price must be indicated as a digital value! Try again.",
+            reply_markup=markup
+        )
+        await state.update_data(pr_message={"id": msg.message_id})
+
+
+# Category management
 @dp.message(sh.AdminStates.renaming_cat, F.text)
 async def cat_renaming(message: types.Message, state: FSMContext):
     data = await state.get_data()

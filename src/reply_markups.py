@@ -65,6 +65,15 @@ def item_management_markup(back=False):
         return markup
 
 
+def select_item_markup(cat_id):
+    select_item_buttons = [
+        [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_getItems_{cat_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
+    return markup
+
+
 def select_cat_markup():
     select_cat_buttons = [
         [types.InlineKeyboardButton(text=tt.get_cats_list, callback_data="im_getCats")],
@@ -77,7 +86,7 @@ def select_cat_markup():
 def cat_management_markup(cat: category.Category):
     cat_management_buttons = [
         [types.InlineKeyboardButton(text=tt.manage_items, callback_data=f"im_manageItems_{cat.get_id()}")],
-        [types.InlineKeyboardButton(text=tt.create_item[0], callback_data=f"im_createItem_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.add_item[0], callback_data=f"im_addItem_{cat.get_id()}")],
         [types.InlineKeyboardButton(text=tt.rename_cat[0], callback_data=f"im_renameCat_{cat.get_id()}")],
         [types.InlineKeyboardButton(text=tt.delete_cat[0], callback_data=f"im_deleteCat_{cat.get_id()}")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]

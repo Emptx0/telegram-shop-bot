@@ -20,9 +20,10 @@ create_cat: list = ["➕ Create New Category", "✅ Category created successfull
 delete_cat: list = ["🗑️ Delete Category", "✅ Category deleted successfully!"]
 rename_cat: list = ["✏️ Rename Category", "✅ Category renamed successfully!"]
 get_cats_list = "📄 Categories List"
+
 get_items_list = "📄 Items List"
 manage_items = "📝 Manage Items"
-create_item: list = ["➕ Add Item", "✅ Item added successfully!"]
+add_item: list = ["➕ Add Item", "✅ Item added successfully!"]
 
 
 def cat_info(cat_id, cat_name):
@@ -31,11 +32,11 @@ def cat_info(cat_id, cat_name):
     return msg_text
 
 
-def get_cats(cats: list):
+def get_items(items: list):
     msg_text = (f"{get_cats_list}:\n\n"
                 f"<b>ID : Name</b>\n")
-    for cat_id, cat_name in cats:
-        msg_text += f"{cat_id} : {cat_name}\n"
+    for item_id, item_name in items:
+        msg_text += f"{item_id} : {item_name}\n"
     msg_text += "\nEnter ID of the category you want to manage:"
     return msg_text
 

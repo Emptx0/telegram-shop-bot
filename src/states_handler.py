@@ -17,3 +17,5 @@ class AdminStates(StatesGroup):
     item_desc = State()
     item_amount = State()
     image_uploading = State()
+
+    choosing_item = State()

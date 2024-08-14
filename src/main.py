@@ -52,7 +52,7 @@ async def start(message: types.Message, state: FSMContext):
     )
 
 
-@dp.message(StateFilter(None), F.text)
+@dp.message(StateFilter(None))
 async def chat_filter(message: types.Message):
     await bot.delete_message(message.chat.id, message.message_id)
 
@@ -134,16 +134,13 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         cats_list = cursor.fetchall()
 
         markup = rm.select_cat_markup()
-        msg_text = f"{tt.get_cats_list}:\n\n"
-        for cat_id, cat_name in cats_list:
-            msg_text += f"{cat_id} : {cat_name}\n"
-        msg_text += "\nEnter ID of the category you want to manage:"
+        msg_text = tt.get_cats(cats_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "renameCat":
         selected_cat_id = callback.data.split("_")[2]
-        markup = rm.item_management_markup(back=True)
+        markup = rm.cat_management_back()
         msg_text = f"{tt.rename_cat[0]}\n\nEnter new name for the category:"
 
         await state.update_data(pr_message={"id": callback.message.message_id}, cat_id={"id": selected_cat_id})
@@ -154,8 +151,19 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         selected_cat = category.Category(callback.data.split("_")[2])
         selected_cat.delete()
 
-        markup = rm.item_management_markup(back=True)
+        markup = rm.cat_management_back()
         msg_text = tt.delete_cat[1]
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "back":
+        cursor.execute('SELECT id, name FROM categories')
+        cats_list = cursor.fetchall()
+
+        markup = rm.select_cat_markup()
+        msg_text = tt.get_cats(cats_list)
+
+        await state.update_data(pr_message={"id": callback.message.message_id})
+        await state.set_state(sh.AdminStates.choosing_cat)
         await update_menu_text(callback.message, markup, msg_text)
 
 
@@ -195,7 +203,7 @@ async def cat_creating(message: types.Message, state: FSMContext):
     cat = category.Category(message.message_id)
     category.create_cat(cat.get_id(), message.text)
 
-    markup = rm.item_management_markup(back=True)
+    markup = rm.cat_management_back()
     msg_text = tt.create_cat[1]
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message"]["id"])
@@ -269,10 +277,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         admins_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = f"{tt.get_admins_list}:\n\n"
-        for user_id, username in admins_list:
-            msg_text += f"{user_id} : @{username}\n"
-        msg_text += "\nEnter user ID you want to manage:"
+        msg_text = tt.get_admins_list + tt.get_users(admins_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -281,10 +286,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         managers_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = f"{tt.get_managers_list}:\n\n"
-        for user_id, username in managers_list:
-            msg_text += f"{user_id} : @{username}\n"
-        msg_text += "\nEnter user ID you want to manage:"
+        msg_text = tt.get_managers_list + tt.get_users(managers_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 

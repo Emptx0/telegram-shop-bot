@@ -49,19 +49,19 @@ def admin_markup():
 
 
 def item_management_markup(back=False):
-    if back:
-        back_button = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-        ]
-        markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
-        return markup
-    else:
+    if not back:
         item_management_buttons = [
             [types.InlineKeyboardButton(text=tt.select_cat, callback_data="im_selectCat")],
             [types.InlineKeyboardButton(text=tt.create_cat[0], callback_data="im_createCat")],
             [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
+        return markup
+    else:
+        back_button = [
+            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
         return markup
 
 
@@ -76,12 +76,21 @@ def select_cat_markup():
 
 def cat_management_markup(cat: category.Category):
     cat_management_buttons = [
-        [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_gatItems_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.manage_items, callback_data=f"im_manageItems_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.create_item[0], callback_data=f"im_createItem_{cat.get_id()}")],
         [types.InlineKeyboardButton(text=tt.rename_cat[0], callback_data=f"im_renameCat_{cat.get_id()}")],
         [types.InlineKeyboardButton(text=tt.delete_cat[0], callback_data=f"im_deleteCat_{cat.get_id()}")],
-        [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
+        [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=cat_management_buttons)
+    return markup
+
+
+def cat_management_back():
+    back_button = [
+        [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
 

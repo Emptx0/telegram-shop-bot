@@ -48,7 +48,7 @@ def admin_markup():
     return markup
 
 
-def item_management_markup(back=False):
+def item_management_panel_markup(back=False):
     if not back:
         item_management_buttons = [
             [types.InlineKeyboardButton(text=tt.select_cat, callback_data="im_selectCat")],
@@ -65,13 +65,20 @@ def item_management_markup(back=False):
         return markup
 
 
-def select_item_markup(cat_id):
-    select_item_buttons = [
-        [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_getItems_{cat_id}")],
-        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
-    ]
-    markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
-    return markup
+def select_item_markup(cat_id, back=False):
+    if not back:
+        select_item_buttons = [
+            [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_getItems_{cat_id}")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
+        return markup
+    else:
+        back_button = [
+            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+        ]
+        markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+        return markup
 
 
 def select_cat_markup():
@@ -83,12 +90,12 @@ def select_cat_markup():
     return markup
 
 
-def cat_management_markup(cat: category.Category):
+def cat_management_markup(cat_id):
     cat_management_buttons = [
-        [types.InlineKeyboardButton(text=tt.manage_items, callback_data=f"im_manageItems_{cat.get_id()}")],
-        [types.InlineKeyboardButton(text=tt.add_item[0], callback_data=f"im_addItem_{cat.get_id()}")],
-        [types.InlineKeyboardButton(text=tt.rename_cat[0], callback_data=f"im_renameCat_{cat.get_id()}")],
-        [types.InlineKeyboardButton(text=tt.delete_cat[0], callback_data=f"im_deleteCat_{cat.get_id()}")],
+        [types.InlineKeyboardButton(text=tt.manage_items, callback_data=f"im_manageItems_{cat_id}")],
+        [types.InlineKeyboardButton(text=tt.add_item[0], callback_data=f"im_addItem_{cat_id}")],
+        [types.InlineKeyboardButton(text=tt.rename_cat[0], callback_data=f"im_renameCat_{cat_id}")],
+        [types.InlineKeyboardButton(text=tt.delete_cat[0], callback_data=f"im_deleteCat_{cat_id}")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=cat_management_buttons)
@@ -100,6 +107,21 @@ def cat_management_back():
         [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+    return markup
+
+
+def item_management_markup(item_id):
+    item_management_buttons = [
+        [types.InlineKeyboardButton(text=tt.rename_item[0], callback_data=f"im_renameItem_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.change_price[0], callback_data=f"im_changePrice_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.change_desc[0], callback_data=f"im_changeDesc_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.change_amount[0], callback_data=f"im_changeAmount_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.upload_image[0], callback_data=f"im_uploadImage_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.delete_image[0], callback_data=f"im_deleteImage_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.delete_item[0], callback_data=f"im_deleteItem_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
     return markup
 
 

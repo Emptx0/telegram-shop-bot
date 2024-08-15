@@ -276,7 +276,7 @@ async def item_management(message: types.Message, state: FSMContext):
                 reply_markup=markup
             )
         else:
-            await bot.send_message(            # TODO add image to message
+            await bot.send_message(             # TODO add image to message
                 chat_id=message.chat.id,
                 text=msg_text,
                 reply_markup=markup

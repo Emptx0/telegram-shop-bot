@@ -29,10 +29,10 @@ class Item:
         cursor.execute(f"UPDATE items SET price=? WHERE id=?", [value, self.get_id()])
         connection.commit()
 
-    def get_cat(self):
+    def get_cat_id(self):
         return self.__clist()[3]
 
-    def set_cat(self, value):
+    def set_cat_id(self, value):
         cursor.execute(f"UPDATE items SET cat_id=? WHERE id=?", [value, self.get_id()])
         connection.commit()
 
@@ -54,7 +54,7 @@ class Item:
         return self.__clist()[6]
 
     def get_image(self):
-        return open("images/" + self.get_image_id(), "rb")
+        return open(f"images/{self.get_image_id()}.png", "rb")
 
     def set_image_id(self, value):
         cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])

@@ -264,7 +264,7 @@ async def item_management(message: types.Message, state: FSMContext):
 
     if itm.item_exist(item_id):
         item = itm.Item(item_id)
-        markup = rm.item_management_markup(item.get_id())
+        markup = rm.item_management_markup(item.get_id(), item.get_cat_id())
         msg_text = tt.item_info(item)
         await bot.delete_message(message.chat.id, message.message_id)
         await bot.delete_message(message.chat.id, data["pr_message_id"])
@@ -276,9 +276,10 @@ async def item_management(message: types.Message, state: FSMContext):
                 reply_markup=markup
             )
         else:
-            await bot.send_message(             # TODO add image to message
+            await bot.send_photo(             # TODO add image to message
                 chat_id=message.chat.id,
-                text=msg_text,
+                photo=item.get_image(),
+                caption=msg_text,
                 reply_markup=markup
             )
 

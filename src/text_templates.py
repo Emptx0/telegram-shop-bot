@@ -57,6 +57,7 @@ def item_info(item: itm.Item):
     msg_text = (f"ID: <b>{item.get_id()}</b>\n"
                 f"Name: {item.get_name()}\n"
                 f"Price: {item.get_price()}\n"
+                f"Amount: {item.get_amount()}\n"
                 f"Description: {item.get_desc()}\n")
     return msg_text
 

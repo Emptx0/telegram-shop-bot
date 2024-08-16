@@ -54,7 +54,8 @@ class Item:
         return self.__clist()[6]
 
     def get_image(self):
-        return open(f"images/{self.get_image_id()}.png", "rb")
+        path: str = f"images/{self.get_image_id()}.png"
+        return path
 
     def set_image_id(self, value):
         cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])

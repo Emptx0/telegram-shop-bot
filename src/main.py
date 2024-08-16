@@ -9,7 +9,7 @@ from aiogram.filters import Command, StateFilter
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.context import FSMContext
-from aiogram.types import LinkPreviewOptions
+from aiogram.types import LinkPreviewOptions, FSInputFile
 
 from configuration import Configuration
 import user as usr
@@ -166,8 +166,17 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         markup = rm.cat_management_markup(cat.get_id())
         msg_text = tt.cat_info(cat.get_id(), cat.get_name())
 
-        await update_menu_text(callback.message, markup, msg_text)
-        await state.clear()
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.clear()
 
     if action == "addItem":
         selected_cat_id = callback.data.split("_")[2]
@@ -275,15 +284,15 @@ async def item_management(message: types.Message, state: FSMContext):
                 text=msg_text,
                 reply_markup=markup
             )
+            await state.clear()
         else:
-            await bot.send_photo(             # TODO add image to message
+            msg = await bot.send_photo(
                 chat_id=message.chat.id,
-                photo=item.get_image(),
+                photo=FSInputFile(item.get_image()),
                 caption=msg_text,
                 reply_markup=markup
             )
-
-        await state.clear()
+            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})
 
     else:
         markup = rm.select_item_markup(data["cat_id"])

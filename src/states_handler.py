@@ -14,8 +14,11 @@ class AdminStates(StatesGroup):
     # Item management
     item_name = State()
     item_price = State()
-    item_desc = State()
-    item_amount = State()
-    image_uploading = State()
 
     choosing_item = State()
+
+    changing_item_name = State()
+    changing_item_price = State()
+    changing_item_desc = State()
+    changing_item_amount = State()
+    image_uploading = State()

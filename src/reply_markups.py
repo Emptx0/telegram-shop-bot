@@ -110,7 +110,7 @@ def cat_management_back():
     return markup
 
 
-def item_management_markup(item_id, cat_id):
+def item_management_markup(item_id, cat_id, back=False):
     item_management_buttons = [
         [types.InlineKeyboardButton(text=tt.rename_item[0], callback_data=f"im_renameItem_{item_id}")],
         [types.InlineKeyboardButton(text=tt.change_price[0], callback_data=f"im_changePrice_{item_id}")],
@@ -122,6 +122,14 @@ def item_management_markup(item_id, cat_id):
         [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
+    return markup
+
+
+def item_management_back(item_id):
+    back_button = [
+        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_itemBack_{item_id}")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
 

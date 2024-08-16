@@ -208,7 +208,7 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         await state.set_state(sh.AdminStates.changing_item_name)
         await update_menu_text(callback.message, markup, msg_text)
 
-    if action == "selectItemBack":
+    if action == "backToCat":
         cat_id = callback.data.split("_")[2]
 
         cat = category.Category(cat_id)
@@ -226,6 +226,28 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
                 reply_markup=markup
             )
             await state.clear()
+
+    if action == "backToItem":
+        item_id = callback.data.split("_")[2]
+        item = itm.Item(item_id)
+        markup = rm.item_management_markup(item.get_id(), item.get_cat_id())
+        msg_text = tt.item_info(item)
+
+        if item.get_image_id() == 0:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        else:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            msg = await bot.send_photo(
+                chat_id=data["chat_id"],
+                photo=FSInputFile(item.get_image()),
+                caption=msg_text,
+                reply_markup=markup
+            )
+            await state.clear()
+            await state.set_state(sh.AdminStates.choosing_item)
+            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})
 
 
 # Category select/add
@@ -387,22 +409,22 @@ async def item_price(message: types.Message, state: FSMContext):
 
 
 # Item management
-@dp.message(sh.AdminStates.changing_item_name, F.text)             # TODO item management
+@dp.message(sh.AdminStates.changing_item_name, F.text)             # TODO item with image rename
 async def cat_renaming(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    cat = category.Category(data["cat_id"]["id"])
-    cat.set_name(message.text)
+    item = itm.Item(data["item_id"])
+    item.set_name(message.text)
 
-    markup = rm.item_management_panel_markup(back=True)
-    msg_text = tt.rename_cat[1]
+    markup = rm.item_management_back(item.get_id())
+    msg_text = tt.rename_item[1]
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message_id"])
-    await bot.send_message(
+    msg = await bot.send_message(
         chat_id=message.chat.id,
         text=msg_text,
         reply_markup=markup
     )
-    await state.clear()
+    await state.update_data(chat_id=message.chat.id, pr_message_id=msg.message_id)
 
 
 # User management

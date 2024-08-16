@@ -69,13 +69,13 @@ def select_item_markup(cat_id, back=False):
     if not back:
         select_item_buttons = [
             [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_getItems_{cat_id}")],
-            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
         return markup
     else:
         back_button = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
         return markup
@@ -119,7 +119,7 @@ def item_management_markup(item_id, cat_id, back=False):
         [types.InlineKeyboardButton(text=tt.upload_image[0], callback_data=f"im_uploadImage_{item_id}")],
         [types.InlineKeyboardButton(text=tt.delete_image[0], callback_data=f"im_deleteImage_{item_id}")],
         [types.InlineKeyboardButton(text=tt.delete_item[0], callback_data=f"im_deleteItem_{item_id}")],
-        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_selectItemBack_{cat_id}")]
+        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
     return markup
@@ -127,7 +127,7 @@ def item_management_markup(item_id, cat_id, back=False):
 
 def item_management_back(item_id):
     back_button = [
-        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_itemBack_{item_id}")]
+        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToItem_{item_id}")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup

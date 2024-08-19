@@ -2,6 +2,7 @@ import asyncio
 import configparser
 import sqlite3
 import logging
+import os
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums import ParseMode
@@ -202,10 +203,11 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
     if action == "renameItem":
         selected_item_id = callback.data.split("_")[2]
         markup = rm.item_management_back(selected_item_id)
-        msg_text = f"{tt.add_item[0]}\n\nEnter new name for the item:"
+        msg_text = f"{tt.rename_item[0]}\n\nEnter new name for the item:"
 
         await state.update_data(
-            pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id},
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
             item_id=selected_item_id
         )
         await state.set_state(sh.AdminStates.changing_item_name)
@@ -214,13 +216,163 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
             await update_menu_text(callback.message, markup, msg_text)
         except:
             data = await state.get_data()
-            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
             msg = await bot.send_message(
-                chat_id=data["pr_message"]["chat_id"],
+                chat_id=data["chat_id"],
                 text=msg_text,
                 reply_markup=markup
             )
             await state.update_data(pr_message_id=msg.message_id)
+
+    if action == "changePrice":
+        selected_item_id = callback.data.split("_")[2]
+        markup = rm.item_management_back(selected_item_id)
+        msg_text = f"{tt.change_price[0]}\n\nEnter new price for the item:"
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item_id
+        )
+        await state.set_state(sh.AdminStates.changing_item_price)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            msg = await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message_id=msg.message_id)
+
+    if action == "changeDesc":
+        selected_item_id = callback.data.split("_")[2]
+        markup = rm.item_management_back(selected_item_id)
+        msg_text = f"{tt.change_desc[0]}\n\nEnter new description for the item:"
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item_id
+        )
+        await state.set_state(sh.AdminStates.changing_item_desc)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            msg = await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message_id=msg.message_id)
+
+    if action == "changeAmount":
+        selected_item_id = callback.data.split("_")[2]
+        markup = rm.item_management_back(selected_item_id)
+        msg_text = f"{tt.change_amount[0]}\n\nEnter amount for the items:"
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item_id
+        )
+        await state.set_state(sh.AdminStates.changing_item_amount)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            msg = await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message_id=msg.message_id)
+
+    if action == "uploadImg":
+        selected_item_id = callback.data.split("_")[2]
+        markup = rm.item_management_back(selected_item_id)
+        msg_text = f"{tt.upload_image[0]}\n\nSend image you want to upload:"
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item_id
+        )
+        await state.set_state(sh.AdminStates.image_uploading)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            msg = await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message_id=msg.message_id)
+
+    if action == "deleteImg":
+        selected_item = itm.Item(callback.data.split("_")[2])
+        if not selected_item.get_image_id() == 0:
+            os.remove(selected_item.get_image_path())
+        selected_item.set_image_id(0)
+        markup = rm.item_management_back(selected_item.get_id())
+        msg_text = tt.delete_image[1]
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item.get_id()
+        )
+        await state.set_state(sh.AdminStates.deleting_item)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.clear()
+
+    if action == "deleteItem":
+        selected_item = itm.Item(callback.data.split("_")[2])
+        markup = rm.select_item_markup(selected_item.get_cat_id(), back=True)
+        msg_text = tt.delete_item[1]
+        selected_item.delete()
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+            item_id=selected_item.get_id()
+        )
+        await state.set_state(sh.AdminStates.deleting_item)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["chat_id"], data["pr_message_id"])
+            await bot.send_message(
+                chat_id=data["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.clear()
 
     if action == "backToCat":
         cat_id = callback.data.split("_")[2]
@@ -255,7 +407,7 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
             await bot.delete_message(data["chat_id"], data["pr_message_id"])
             msg = await bot.send_photo(
                 chat_id=data["chat_id"],
-                photo=FSInputFile(item.get_image()),
+                photo=FSInputFile(item.get_image_path()),
                 caption=msg_text,
                 reply_markup=markup
             )
@@ -320,7 +472,7 @@ async def cat_renaming(message: types.Message, state: FSMContext):
     cat = category.Category(data["cat_id"])
     cat.set_name(message.text)
 
-    markup = rm.item_management_panel_markup(back=True)
+    markup = rm.cat_management_back()
     msg_text = tt.rename_cat[1]
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message_id"])
@@ -355,7 +507,7 @@ async def item_management(message: types.Message, state: FSMContext):
         else:
             msg = await bot.send_photo(
                 chat_id=message.chat.id,
-                photo=FSInputFile(item.get_image()),
+                photo=FSInputFile(item.get_image_path()),
                 caption=msg_text,
                 reply_markup=markup
             )
@@ -424,7 +576,7 @@ async def item_price(message: types.Message, state: FSMContext):
 
 # Item management
 @dp.message(sh.AdminStates.changing_item_name, F.text)
-async def cat_renaming(message: types.Message, state: FSMContext):
+async def changing_item_name(message: types.Message, state: FSMContext):
     data = await state.get_data()
     item = itm.Item(data["item_id"])
     item.set_name(message.text)
@@ -434,11 +586,88 @@ async def cat_renaming(message: types.Message, state: FSMContext):
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message_id"])
     msg = await bot.send_message(
-        chat_id=message.chat.id,
+        chat_id=data["chat_id"],
         text=msg_text,
         reply_markup=markup
     )
-    await state.update_data(chat_id=message.chat.id, pr_message_id=msg.message_id)
+    await state.update_data(pr_message_id=msg.message_id)
+
+
+@dp.message(sh.AdminStates.changing_item_price, F.text)
+async def changing_item_price(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    item = itm.Item(data["item_id"])
+    item.set_price(message.text)
+
+    markup = rm.item_management_back(item.get_id())
+    msg_text = tt.change_price[1]
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    msg = await bot.send_message(
+        chat_id=data["chat_id"],
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message_id=msg.message_id)
+
+
+@dp.message(sh.AdminStates.changing_item_desc, F.text)
+async def changing_item_desc(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    item = itm.Item(data["item_id"])
+    item.set_desc(message.text)
+
+    markup = rm.item_management_back(item.get_id())
+    msg_text = tt.change_desc[1]
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    msg = await bot.send_message(
+        chat_id=data["chat_id"],
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message_id=msg.message_id)
+
+
+@dp.message(sh.AdminStates.changing_item_amount, F.text)
+async def changing_item_amount(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    item = itm.Item(data["item_id"])
+    item.set_amount(message.text)
+
+    markup = rm.item_management_back(item.get_id())
+    msg_text = tt.change_amount[1]
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    msg = await bot.send_message(
+        chat_id=data["chat_id"],
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message_id=msg.message_id)
+
+
+@dp.message(sh.AdminStates.image_uploading, F.photo)
+async def image_uploading(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    item = itm.Item(data["item_id"])
+    image_id = message.message_id
+    if not item.get_image_id() == 0:
+        os.remove(item.get_image_path())
+    item.set_image_id(image_id)
+
+    await message.bot.download(file=message.photo[-1].file_id, destination=item.get_image_path())
+
+    markup = rm.item_management_back(item.get_id())
+    msg_text = tt.upload_image[1]
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    msg = await bot.send_message(
+        chat_id=data["chat_id"],
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message_id=msg.message_id)
 
 
 # User management

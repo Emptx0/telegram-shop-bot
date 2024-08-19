@@ -116,8 +116,8 @@ def item_management_markup(item_id, cat_id, back=False):
         [types.InlineKeyboardButton(text=tt.change_price[0], callback_data=f"im_changePrice_{item_id}")],
         [types.InlineKeyboardButton(text=tt.change_desc[0], callback_data=f"im_changeDesc_{item_id}")],
         [types.InlineKeyboardButton(text=tt.change_amount[0], callback_data=f"im_changeAmount_{item_id}")],
-        [types.InlineKeyboardButton(text=tt.upload_image[0], callback_data=f"im_uploadImage_{item_id}")],
-        [types.InlineKeyboardButton(text=tt.delete_image[0], callback_data=f"im_deleteImage_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.upload_image[0], callback_data=f"im_uploadImg_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.delete_image[0], callback_data=f"im_deleteImg_{item_id}")],
         [types.InlineKeyboardButton(text=tt.delete_item[0], callback_data=f"im_deleteItem_{item_id}")],
         [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
     ]

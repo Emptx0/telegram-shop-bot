@@ -21,4 +21,5 @@ class AdminStates(StatesGroup):
     changing_item_price = State()
     changing_item_desc = State()
     changing_item_amount = State()
+    deleting_item = State()
     image_uploading = State()

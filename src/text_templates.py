@@ -48,8 +48,8 @@ rename_item: list = ["✏️ Rename Item", "✅ Item renamed successfully!"]
 change_price: list = ["💵 Change Price", "✅ Price changed successfully!"]
 change_desc: list = ["📝 Change Description", "✅ Description changed successfully!"]
 change_amount: list = ["✖️ Change Amount", "✅ Amount changed successfully!"]
-upload_image: list = ["⬆️ Upload Image", "✅ Item uploaded successfully!"]
-delete_image: list = ["🗑️ Delete Image", "✅ Item deleted successfully!"]
+upload_image: list = ["⬆️ Upload New Image", "✅ Image uploaded successfully!"]
+delete_image: list = ["🗑️ Delete Image", "✅ Image deleted successfully!"]
 delete_item: list = ["🗑️ Delete Item", "✅ Item deleted successfully!"]
 
 

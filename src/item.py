@@ -53,12 +53,14 @@ class Item:
     def get_image_id(self):
         return self.__clist()[6]
 
-    def get_image(self):
+    def get_image_path(self):
         path: str = f"images/{self.get_image_id()}.png"
         return path
 
     def set_image_id(self, value):
+
         cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])
+        connection.commit()
 
     def delete(self):
         cursor.execute(f"DELETE FROM items WHERE id=?", [self.get_id()])

@@ -204,9 +204,23 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         markup = rm.item_management_back(selected_item_id)
         msg_text = f"{tt.add_item[0]}\n\nEnter new name for the item:"
 
-        await state.update_data(pr_message_id=callback.message.message_id, item_id=selected_item_id)
+        await state.update_data(
+            pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id},
+            item_id=selected_item_id
+        )
         await state.set_state(sh.AdminStates.changing_item_name)
-        await update_menu_text(callback.message, markup, msg_text)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            msg = await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message_id=msg.message_id)
 
     if action == "backToCat":
         cat_id = callback.data.split("_")[2]
@@ -409,7 +423,7 @@ async def item_price(message: types.Message, state: FSMContext):
 
 
 # Item management
-@dp.message(sh.AdminStates.changing_item_name, F.text)             # TODO item with image rename
+@dp.message(sh.AdminStates.changing_item_name, F.text)
 async def cat_renaming(message: types.Message, state: FSMContext):
     data = await state.get_data()
     item = itm.Item(data["item_id"])

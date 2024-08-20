@@ -35,10 +35,10 @@ def cat_info(cat_id, cat_name):
     return msg_text
 
 
-def get_cats(cats: list):
+def get_cats(cat_list: list):
     msg_text = (f"{get_cats_list}:\n\n"
                 f"<b>ID : Name</b>\n")
-    for cat_id, cat_name in cats:
+    for cat_id, cat_name in cat_list:
         msg_text += f"{cat_id} : {cat_name}\n"
     msg_text += "\nEnter ID of the category you want to manage:"
     return msg_text
@@ -62,10 +62,10 @@ def item_info(item: itm.Item):
     return msg_text
 
 
-def get_items(items: list):
+def get_items(items_list: list):
     msg_text = (f"{get_items_list}:\n\n"
                 f"<b>ID : Name</b>\n")
-    for item_id, item_name in items:
+    for item_id, item_name in items_list:
         msg_text += f"{item_id} : {item_name}\n"
     msg_text += "\nEnter ID of the item you want to manage:"
     return msg_text
@@ -82,9 +82,9 @@ remove_admin = "🔴 Remove Admin Role"
 remove_manager = "🔵 Remove Manager Role"
 
 
-def get_users(users: list):
+def get_users(users_list: list):
     msg_text = f"\n\n<b>ID : Username</b>\n"
-    for user_id, username in users:
+    for user_id, username in users_list:
         msg_text += f"{user_id} : @{username}\n"
     msg_text += "\nEnter user ID you want to manage:"
     return msg_text

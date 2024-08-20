@@ -3,6 +3,7 @@ import configparser
 import sqlite3
 import logging
 import os
+from random import randint
 
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums import ParseMode
@@ -37,16 +38,15 @@ dp = Dispatcher(storage=MemoryStorage())
 
 
 @dp.message(Command("start"))
-async def start(message: types.Message, state: FSMContext):
+async def start(message: types.Message):
     user = usr.User(message.chat.id, message.from_user.username)
-    markup = rm.get_markup_main(user)
+    markup = rm.main_menu_markup(user)
 
     await bot.send_message(
         chat_id=message.chat.id,
         text=tt.myGitHub,
         link_preview_options=LinkPreviewOptions(is_disabled=True)
     )
-
     await bot.send_message(
         chat_id=message.chat.id,
         text=tt.greeting,
@@ -71,15 +71,29 @@ async def update_menu_text(message: types.Message, markup, msg_text):
 async def callbacks_main(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
 
-    if action == "profile":
-        user = usr.User(callback.from_user.id)
-        markup = rm.profile_markup(user)
-        msg_text = tt.profile_info(callback.from_user.first_name, user.is_main_admin(), user.is_admin(), user.is_manager())
-        await update_menu_text(callback.message, markup, msg_text)
-
     if action == "adminPanel":
         markup = rm.admin_markup()
         msg_text = tt.admin_panel
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "catalogue":
+        cursor.execute('SELECT id, name FROM categories')
+        cats_list = cursor.fetchall()
+
+        markup = rm.catalogue_markup(cats_list)
+        msg_text = (f"{tt.catalogue}\n\n"
+                    f"Select category:")
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "profile":
+        user = usr.User(callback.from_user.id)
+        markup = rm.profile_markup(user)
+        msg_text = tt.profile_info(
+            callback.from_user.first_name,
+            user.is_main_admin(),
+            user.is_admin(),
+            user.is_manager()
+        )
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
@@ -104,7 +118,7 @@ async def callbacks_admin_panel(callback: types.CallbackQuery, state: FSMContext
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
-        markup = rm.get_markup_main(usr.User(callback.from_user.id))
+        markup = rm.main_menu_markup(usr.User(callback.from_user.id))
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -227,7 +241,7 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
     if action == "changePrice":
         selected_item_id = callback.data.split("_")[2]
         markup = rm.item_management_back(selected_item_id)
-        msg_text = f"{tt.change_price[0]}\n\nEnter new price for the item:"
+        msg_text = f"{tt.change_price[0]}\n\nEnter new price for the item in $:"
 
         await state.update_data(
             pr_message_id=callback.message.message_id,
@@ -415,6 +429,8 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
             await state.set_state(sh.AdminStates.choosing_item)
             await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})
 
+    await callback.answer()
+
 
 # Category select/add
 @dp.message(sh.AdminStates.choosing_cat, F.text)
@@ -450,7 +466,11 @@ async def cat_management(message: types.Message, state: FSMContext):
 @dp.message(sh.AdminStates.creating_cat, F.text)
 async def cat_creating(message: types.Message, state: FSMContext):
     data = await state.get_data()
-    cat = category.Category(message.message_id)
+    while True:
+        cat_id = randint(100000, 999999)
+        if not category.category_exist(cat_id):
+            break
+    cat = category.Category(cat_id)
     category.create_cat(cat.get_id(), message.text)
 
     markup = rm.cat_management_back()
@@ -530,7 +550,7 @@ async def item_name(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
     markup = rm.select_item_markup(data["cat_id"], back=True)
-    msg_text = "Enter item price:"
+    msg_text = "Enter item price in $:"
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message_id"])
     msg = await bot.send_message(
@@ -549,6 +569,10 @@ async def item_price(message: types.Message, state: FSMContext):
 
     try:
         float(price)
+        while True:
+            item_id = randint(100000, 999999)
+            if not itm.item_exist(item_id):
+                break
         itm.create_item(message.message_id, data["item_name"], price, data["cat_id"])
 
         markup = rm.select_item_markup(data["cat_id"], back=True)
@@ -568,7 +592,7 @@ async def item_price(message: types.Message, state: FSMContext):
         await bot.delete_message(message.chat.id, data["pr_message_id"])
         msg = await bot.send_message(
             chat_id=message.chat.id,
-            text=f"The price must be indicated as a digital value! Try again.",
+            text=f"The price must be a digital value! Try again.",
             reply_markup=markup
         )
         await state.update_data(pr_message_id=msg.message_id)
@@ -597,18 +621,33 @@ async def changing_item_name(message: types.Message, state: FSMContext):
 async def changing_item_price(message: types.Message, state: FSMContext):
     data = await state.get_data()
     item = itm.Item(data["item_id"])
-    item.set_price(message.text)
+    price = message.text
 
-    markup = rm.item_management_back(item.get_id())
-    msg_text = tt.change_price[1]
-    await bot.delete_message(message.chat.id, message.message_id)
-    await bot.delete_message(message.chat.id, data["pr_message_id"])
-    msg = await bot.send_message(
-        chat_id=data["chat_id"],
-        text=msg_text,
-        reply_markup=markup
-    )
-    await state.update_data(pr_message_id=msg.message_id)
+    try:
+        float(price)
+        item.set_price(price)
+
+        markup = rm.item_management_back(item.get_id())
+        msg_text = tt.change_price[1]
+        await bot.delete_message(message.chat.id, message.message_id)
+        await bot.delete_message(message.chat.id, data["pr_message_id"])
+        msg = await bot.send_message(
+            chat_id=data["chat_id"],
+            text=msg_text,
+            reply_markup=markup
+        )
+        await state.update_data(pr_message_id=msg.message_id)
+
+    except ValueError:
+        markup = rm.item_management_back(item.get_id())
+        await bot.delete_message(message.chat.id, message.message_id)
+        await bot.delete_message(message.chat.id, data["pr_message_id"])
+        msg = await bot.send_message(
+            chat_id=message.chat.id,
+            text=f"The price must be a digital value! Try again.",
+            reply_markup=markup
+        )
+        await state.update_data(pr_message_id=msg.message_id)
 
 
 @dp.message(sh.AdminStates.changing_item_desc, F.text)
@@ -783,13 +822,36 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
     await callback.answer()
 
 
+# Catalogue callback handler
+@dp.callback_query(F.data.startswith("cat_"))
+async def callbacks_catalogue(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "viewCat":
+        cat_id = callback.data.split("_")[2]
+        cursor.execute('SELECT id, name FROM items WHERE cat_id=?', [cat_id])
+        items_list = cursor.fetchall()
+
+        markup = rm.items_markup(items_list)
+        msg_text = (f"{tt.catalogue}\n\n"
+                    f"Select item:")
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "back":
+        markup = rm.main_menu_markup(usr.User(callback.from_user.id))
+        msg_text = tt.greeting
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
+
+
 # User profile callback handler
 @dp.callback_query(F.data.startswith("profile_"))
 async def callbacks_profile(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
 
     if action == "back":
-        markup = rm.get_markup_main(usr.User(callback.from_user.id))
+        markup = rm.main_menu_markup(usr.User(callback.from_user.id))
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
 

@@ -1,13 +1,14 @@
 from aiogram import types
+from collections import deque
 
 import text_templates as tt
 import user as usr
 import category
 
 
-# /start
-def get_markup_main(user: usr):
-    main_buttons = [
+# Main Menu
+def main_menu_markup(user: usr):
+    menu_buttons = [
         [types.InlineKeyboardButton(text=tt.catalogue, callback_data="main_catalogue")],
         [types.InlineKeyboardButton(text=tt.profile, callback_data="main_profile")],
         [types.InlineKeyboardButton(text=tt.cart, callback_data="main_cart")]
@@ -16,24 +17,36 @@ def get_markup_main(user: usr):
     view_orders_button = [[types.InlineKeyboardButton(text=tt.view_orders, callback_data="main_viewOrders")]]
 
     if user.is_admin():
-        markup = types.InlineKeyboardMarkup(inline_keyboard=admin_panel_button + view_orders_button + main_buttons)
+        markup = types.InlineKeyboardMarkup(inline_keyboard=admin_panel_button + view_orders_button + menu_buttons)
         return markup
     if user.is_manager():
-        markup = types.InlineKeyboardMarkup(inline_keyboard=view_orders_button + main_buttons)
+        markup = types.InlineKeyboardMarkup(inline_keyboard=view_orders_button + menu_buttons)
         return markup
 
-    markup = types.InlineKeyboardMarkup(inline_keyboard=main_buttons)
+    markup = types.InlineKeyboardMarkup(inline_keyboard=menu_buttons)
     return markup
 
 
-# My Profile
-def profile_markup(user: usr):
-    profile_buttons = [
-        [types.InlineKeyboardButton(text=tt.my_orders, callback_data="profile_orders")],
-        [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
-        [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
-    ]
-    markup = types.InlineKeyboardMarkup(inline_keyboard=profile_buttons)
+# Catalogue
+def catalogue_markup(cat_list):
+    catalogue_buttons = list()
+
+    for cat_id, cat_name in cat_list:
+        catalogue_buttons.append([types.InlineKeyboardButton(text=cat_name, callback_data=f"cat_viewCat_{cat_id}")])
+    catalogue_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")])
+
+    markup = types.InlineKeyboardMarkup(inline_keyboard=catalogue_buttons)
+    return markup
+
+
+def items_markup(items_list):
+    category_buttons = list()
+
+    for item_id, item_name in items_list:
+        category_buttons.append([types.InlineKeyboardButton(text=item_name, callback_data=f"cat_viewItem_{item_id}")])
+    category_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"main_catalogue")])
+
+    markup = types.InlineKeyboardMarkup(inline_keyboard=category_buttons)
     return markup
 
 
@@ -208,3 +221,14 @@ def user_management_markup(user: usr.User, main_admin_access):
             markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 
         return markup
+
+
+# Profile
+def profile_markup(user: usr):
+    profile_buttons = [
+        [types.InlineKeyboardButton(text=tt.my_orders, callback_data="profile_orders")],
+        [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=profile_buttons)
+    return markup

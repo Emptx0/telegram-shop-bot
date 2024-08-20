@@ -1,4 +1,5 @@
 import sqlite3
+import os
 
 connection = sqlite3.connect('data.db')
 cursor = connection.cursor()
@@ -58,11 +59,12 @@ class Item:
         return path
 
     def set_image_id(self, value):
-
         cursor.execute(f"UPDATE items SET image_id=? WHERE id=?", [value, self.get_id()])
         connection.commit()
 
     def delete(self):
+        if not self.get_image_id() == 0:
+            os.remove(self.get_image_path())
         cursor.execute(f"DELETE FROM items WHERE id=?", [self.get_id()])
         connection.commit()
 

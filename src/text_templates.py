@@ -1,7 +1,7 @@
 import item as itm
 
 
-# /start Main menu
+# Main menu
 myGitHub = "<i>⭐️ My GitHub: https://github.com/Emptx0</i>"
 greeting = "<b>Welcome to telegram shop bot!</b>"
 
@@ -17,7 +17,7 @@ back = "⬅️ Back"
 item_management = "📦 Item Management"
 user_management = "🧍 User Management"
 
-# Admin panel/Item management
+# Item management
 select_cat = "📂 Select Category"
 create_cat: list = ["➕ Create New Category", "✅ Category created successfully!"]
 rename_cat: list = ["✏️ Rename Category", "✅ Category renamed successfully!"]
@@ -53,12 +53,12 @@ delete_image: list = ["🗑️ Delete Image", "✅ Image deleted successfully!"]
 delete_item: list = ["🗑️ Delete Item", "✅ Item deleted successfully!"]
 
 
-def item_info(item: itm.Item):
-    msg_text = (f"ID: <b>{item.get_id()}</b>\n"
-                f"Name: {item.get_name()}\n"
-                f"Price: {item.get_price()}\n"
-                f"Amount: {item.get_amount()}\n"
-                f"Description: {item.get_desc()}\n")
+def item_info(selected_item: itm.Item):
+    msg_text = (f"ID: <b>{selected_item.get_id()}</b>\n"
+                f"Name: {selected_item.get_name()}\n"
+                f"Price: {selected_item.get_price()}\n"
+                f"Amount: {selected_item.get_amount()}\n"
+                f"Description: {selected_item.get_desc()}\n")
     return msg_text
 
 
@@ -71,7 +71,7 @@ def get_items(items_list: list):
     return msg_text
 
 
-# Admin panel/User management
+# User management
 get_admins_list = "🔴 Admins list"
 get_managers_list = "🔵 Managers list"
 
@@ -96,6 +96,18 @@ def user_info(user_id, username, is_main_admin, is_admin, is_manager) -> str:
                 f"Status: %s" % ("Main Admin" if is_main_admin else
                                  "Admin" if is_admin else
                                  "Manager" if is_manager else "Customer"))
+    return msg_text
+
+
+# View Item
+add_to_cart = "🛒 Add To Cart"
+
+
+def item(selected_item: itm.Item):
+    msg_text = (f"Name: <b>{selected_item.get_name()}</b>\n"
+                f"Price: {selected_item.get_price()}\n"
+                f"Amount: {selected_item.get_amount()}\n"
+                f"Description: {selected_item.get_desc()}\n")
     return msg_text
 
 

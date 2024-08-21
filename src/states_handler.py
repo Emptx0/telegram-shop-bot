@@ -12,8 +12,8 @@ class AdminStates(StatesGroup):
     renaming_cat = State()
 
     # Item management
-    item_name = State()
-    item_price = State()
+    add_item_name = State()
+    add_item_price = State()
 
     choosing_item = State()
 
@@ -23,3 +23,7 @@ class AdminStates(StatesGroup):
     changing_item_amount = State()
     deleting_item = State()
     image_uploading = State()
+
+
+class CustomerStates(StatesGroup):
+    viewing_item = State()

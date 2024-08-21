@@ -28,10 +28,10 @@ def main_menu_markup(user: usr):
 
 
 # Catalogue
-def catalogue_markup(cat_list):
+def catalogue_cats_markup(cats_list):
     catalogue_buttons = list()
 
-    for cat_id, cat_name in cat_list:
+    for cat_id, cat_name in cats_list:
         catalogue_buttons.append([types.InlineKeyboardButton(text=cat_name, callback_data=f"cat_viewCat_{cat_id}")])
     catalogue_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")])
 
@@ -39,14 +39,28 @@ def catalogue_markup(cat_list):
     return markup
 
 
-def items_markup(items_list):
+def catalogue_items_markup(items_list):
     category_buttons = list()
 
-    for item_id, item_name in items_list:
-        category_buttons.append([types.InlineKeyboardButton(text=item_name, callback_data=f"cat_viewItem_{item_id}")])
+    for item_id, item_name, item_price in items_list:
+        category_buttons.append([
+            types.InlineKeyboardButton(
+                text=f"{item_name} - ${item_price}",
+                callback_data=f"cat_viewItem_{item_id}"
+            )
+        ])
     category_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"main_catalogue")])
 
     markup = types.InlineKeyboardMarkup(inline_keyboard=category_buttons)
+    return markup
+
+
+def item_markup(item_id, cat_id):
+    item_buttons = [
+        [types.InlineKeyboardButton(text=tt.add_to_cart, callback_data=f"cat_addToCart_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_viewCat_{cat_id}")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=item_buttons)
     return markup
 
 

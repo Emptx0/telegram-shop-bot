@@ -80,7 +80,7 @@ async def callbacks_main(callback: types.CallbackQuery):
         cursor.execute('SELECT id, name FROM categories')
         cats_list = cursor.fetchall()
 
-        markup = rm.catalogue_markup(cats_list)
+        markup = rm.catalogue_cats_markup(cats_list)
         msg_text = (f"{tt.catalogue}\n\n"
                     f"Select category:")
         await update_menu_text(callback.message, markup, msg_text)
@@ -179,7 +179,7 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
         msg_text = f"{tt.add_item[0]}\n\nEnter name of the item you want to add:"
 
         await state.update_data(pr_message_id=callback.message.message_id, cat_id=selected_cat_id)
-        await state.set_state(sh.AdminStates.item_name)
+        await state.set_state(sh.AdminStates.add_item_name)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "manageItems":
@@ -545,7 +545,7 @@ async def item_management(message: types.Message, state: FSMContext):
         await state.update_data(pr_message_id=msg.message_id)
 
 
-@dp.message(sh.AdminStates.item_name, F.text)
+@dp.message(sh.AdminStates.add_item_name, F.text)
 async def item_name(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
@@ -559,10 +559,10 @@ async def item_name(message: types.Message, state: FSMContext):
         reply_markup=markup
     )
     await state.update_data(pr_message_id=msg.message_id, item_name=message.text)
-    await state.set_state(sh.AdminStates.item_price)
+    await state.set_state(sh.AdminStates.add_item_price)
 
 
-@dp.message(sh.AdminStates.item_price, F.text)
+@dp.message(sh.AdminStates.add_item_price, F.text)
 async def item_price(message: types.Message, state: FSMContext):
     data = await state.get_data()
     price = message.text
@@ -824,18 +824,41 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
 
 # Catalogue callback handler
 @dp.callback_query(F.data.startswith("cat_"))
-async def callbacks_catalogue(callback: types.CallbackQuery):
+async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
     action = callback.data.split("_")[1]
 
     if action == "viewCat":
         cat_id = callback.data.split("_")[2]
-        cursor.execute('SELECT id, name FROM items WHERE cat_id=?', [cat_id])
+        cursor.execute('SELECT id, name, price FROM items WHERE cat_id=?', [cat_id])
         items_list = cursor.fetchall()
 
-        markup = rm.items_markup(items_list)
+        markup = rm.catalogue_items_markup(items_list)
         msg_text = (f"{tt.catalogue}\n\n"
                     f"Select item:")
         await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "viewItem":
+        item_id = callback.data.split("_")[2]
+        item = itm.Item(item_id)
+
+        markup = rm.item_markup(item.get_id(), item.get_cat_id())
+        msg_text = tt.item(item)
+        await state.set_state(sh.CustomerStates.viewing_item)
+        await state.update_data(pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id})
+
+        if item.get_image_id() == 0:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        else:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            msg = await bot.send_photo(
+                chat_id=data["pr_message"]["chat_id"],
+                photo=FSInputFile(item.get_image_path()),
+                caption=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})  # TODO working back button for item view
 
     if action == "back":
         markup = rm.main_menu_markup(usr.User(callback.from_user.id))

@@ -25,10 +25,10 @@ class Category:
         connection.commit()
 
     def delete(self):
-        cursor.execute(f"SELECT id FROM items WHERE cat_id = ?", [self.get_id()])  # TODO cat delete
+        cursor.execute(f"SELECT id FROM items WHERE cat_id = ?", [self.get_id()])
         item_id_list = cursor.fetchall()
         for item_id in item_id_list:
-            item = itm.Item(item_id)
+            item = itm.Item(*item_id)
             item.delete()
 
         cursor.execute(f"DELETE FROM categories WHERE id = ?", [self.get_id()])

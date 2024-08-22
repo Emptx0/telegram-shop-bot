@@ -100,12 +100,12 @@ def user_info(user_id, username, is_main_admin, is_admin, is_manager) -> str:
 
 
 # View Item
-add_to_cart = "🛒 Add To Cart"
+add_to_cart: list = ["🛒 Add To Cart", "✅ Item added to cart!"]
 
 
 def item(selected_item: itm.Item):
     msg_text = (f"Name: <b>{selected_item.get_name()}</b>\n"
-                f"Price: {selected_item.get_price()}\n"
+                f"Price: ${selected_item.get_price()}\n"
                 f"Amount: {selected_item.get_amount()}\n"
                 f"Description: {selected_item.get_desc()}\n")
     return msg_text

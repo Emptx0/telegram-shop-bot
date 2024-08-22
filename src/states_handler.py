@@ -27,3 +27,4 @@ class AdminStates(StatesGroup):
 
 class CustomerStates(StatesGroup):
     viewing_item = State()
+    add_to_cart = State()

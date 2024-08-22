@@ -57,10 +57,16 @@ def catalogue_items_markup(items_list):
 
 def item_markup(item_id, cat_id):
     item_buttons = [
-        [types.InlineKeyboardButton(text=tt.add_to_cart, callback_data=f"cat_addToCart_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.add_to_cart[0], callback_data=f"cat_addToCart_{item_id}")],
         [types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_viewCat_{cat_id}")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=item_buttons)
+    return markup
+
+
+def back_to_item_markup(item_id):
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_viewItem_{item_id}")]]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
 
@@ -85,9 +91,7 @@ def item_management_panel_markup(back=False):
         markup = types.InlineKeyboardMarkup(inline_keyboard=item_management_buttons)
         return markup
     else:
-        back_button = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-        ]
+        back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]]
         markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
         return markup
 
@@ -101,9 +105,7 @@ def select_item_markup(cat_id, back=False):
         markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
         return markup
     else:
-        back_button = [
-            [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
-        ]
+        back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]]
         markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
         return markup
 
@@ -130,9 +132,7 @@ def cat_management_markup(cat_id):
 
 
 def cat_management_back():
-    back_button = [
-        [types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]
-    ]
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="im_back")]]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
@@ -153,9 +153,7 @@ def item_management_markup(item_id, cat_id, back=False):
 
 
 def item_management_back(item_id):
-    back_button = [
-        [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToItem_{item_id}")]
-    ]
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToItem_{item_id}")]]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
@@ -182,9 +180,7 @@ def select_user_markup(user: usr.User):
 def user_management_markup(user: usr.User, main_admin_access):
     if main_admin_access:
         if user.is_main_admin():
-            user_management_buttons = [
-                [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-            ]
+            user_management_buttons = [[types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]]
             markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
             return markup
 
@@ -215,9 +211,7 @@ def user_management_markup(user: usr.User, main_admin_access):
 
     else:
         if user.is_admin():
-            user_management_buttons = [
-                [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
-            ]
+            user_management_buttons = [[types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]]
             markup = types.InlineKeyboardMarkup(inline_keyboard=user_management_buttons)
 
         elif user.is_manager():

@@ -751,7 +751,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
     admin = usr.User(callback.from_user.id)
 
     if action == "getAdmins":
-        cursor.execute('SELECT user_id, username FROM users WHERE is_admin = ?', (1,))
+        cursor.execute('SELECT user_id, username FROM users WHERE is_admin=?', (1,))
         admins_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
@@ -760,7 +760,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "getManagers":
-        cursor.execute('SELECT user_id, username FROM users WHERE is_manager = ?', (1,))
+        cursor.execute('SELECT user_id, username FROM users WHERE is_manager=?', (1,))
         managers_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
@@ -835,7 +835,17 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
         markup = rm.catalogue_items_markup(items_list)
         msg_text = (f"{tt.catalogue}\n\n"
                     f"Select item:")
-        await update_menu_text(callback.message, markup, msg_text)
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
 
     if action == "viewItem":
         item_id = callback.data.split("_")[2]
@@ -858,7 +868,37 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
                 caption=msg_text,
                 reply_markup=markup
             )
-            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})  # TODO working back button for item view
+            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})
+
+    if action == "addToCart":
+        item_id = callback.data.split("_")[2]
+        selected_item = itm.Item(item_id)
+
+        markup = rm.back_to_item_markup(item_id)
+        msg_text = (f"<i>{selected_item.get_amount()} available</i>"
+                    "\nEnter amount:")
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.update_data(
+                pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id},
+                item_id=item_id
+            )
+            await state.set_state(sh.CustomerStates.add_to_cart)
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            msg = await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(
+                pr_message={"chat_id": msg.chat.id, "id": msg.message_id},
+                item_id=item_id
+            )
+
+        await state.set_state(sh.CustomerStates.add_to_cart)
 
     if action == "back":
         markup = rm.main_menu_markup(usr.User(callback.from_user.id))
@@ -866,6 +906,68 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
+
+
+# Add to cart
+@dp.message(sh.CustomerStates.add_to_cart, F.text)
+async def get_amount(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+    amount = message.text
+    item = itm.Item(data["item_id"])
+
+    try:
+        int(amount)
+        if 0 <= int(amount) <= item.get_amount():
+            user = usr.User(message.from_user.id)
+            user.add_to_cart(item.get_id(), amount)
+
+            markup = rm.back_to_item_markup(item.get_id())
+            msg_text = tt.add_to_cart[1]
+
+            await bot.delete_message(message.chat.id, message.message_id)
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+
+            await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+        else:
+            markup = rm.back_to_item_markup(item.get_id())
+            msg_text = (f"<i>{item.get_amount()} available</i>"
+                        "\nPlease enter a valid value:")
+
+            await bot.delete_message(message.chat.id, message.message_id)
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+
+            msg = await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(
+                pr_message={"chat_id": msg.chat.id, "id": msg.message_id},
+                item_id=item.get_id()
+            )
+    except ValueError:
+        markup = rm.back_to_item_markup(item.get_id())
+        msg_text = (f"<i>{item.get_amount()} available</i>"
+                    "\nPlease enter a valid value:")
+
+        await bot.delete_message(message.chat.id, message.message_id)
+        await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+
+        msg = await bot.send_message(
+            chat_id=data["pr_message"]["chat_id"],
+            text=msg_text,
+            reply_markup=markup
+        )
+        await state.update_data(
+            pr_message={"chat_id": msg.chat.id, "id": msg.message_id},
+            item_id=item.get_id()
+        )
+
+# TODO cart check for customer
 
 
 # User profile callback handler

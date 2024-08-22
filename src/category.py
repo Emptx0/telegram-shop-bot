@@ -11,7 +11,7 @@ class Category:
         self.__cat_id = cat_id
 
     def __clist(self):
-        cursor.execute(f"SELECT * FROM categories WHERE id = ?", [self.get_id()])
+        cursor.execute(f"SELECT * FROM categories WHERE id=?", [self.get_id()])
         return list(cursor)[0]
 
     def get_id(self):
@@ -21,17 +21,17 @@ class Category:
         return self.__clist()[1]
 
     def set_name(self, value):
-        cursor.execute(f"UPDATE categories SET name = ? WHERE id = ?", [value, self.get_id()])
+        cursor.execute(f"UPDATE categories SET name=? WHERE id=?", [value, self.get_id()])
         connection.commit()
 
     def delete(self):
-        cursor.execute(f"SELECT id FROM items WHERE cat_id = ?", [self.get_id()])
+        cursor.execute(f"SELECT id FROM items WHERE cat_id=?", [self.get_id()])
         item_id_list = cursor.fetchall()
         for item_id in item_id_list:
             item = itm.Item(*item_id)
             item.delete()
 
-        cursor.execute(f"DELETE FROM categories WHERE id = ?", [self.get_id()])
+        cursor.execute(f"DELETE FROM categories WHERE id=?", [self.get_id()])
         connection.commit()
 
 

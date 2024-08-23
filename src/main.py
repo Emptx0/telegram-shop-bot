@@ -87,14 +87,14 @@ async def callbacks_main(callback: types.CallbackQuery):
 
     if action == "profile":
         user = usr.User(callback.from_user.id)
-        markup = rm.profile_markup(user)
-        msg_text = tt.profile_info(
-            callback.from_user.first_name,
-            user.is_main_admin(),
-            user.is_admin(),
-            user.is_manager()
-        )
+        markup = rm.profile_markup()
+        msg_text = tt.profile_info(callback.from_user.first_name, user)
         await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "cart":
+        user_id = callback.from_user.id
+
+        # TODO cart check for customer
 
     await callback.answer()
 
@@ -719,10 +719,7 @@ async def user_management(message: types.Message, state: FSMContext):
         selected_user = usr.User(user_id)
         admin = usr.User(message.from_user.id)
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
-        msg_text = tt.user_info(
-            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
-            selected_user.is_admin(), selected_user.is_manager()
-        )
+        msg_text = tt.user_info(selected_user)
         await bot.delete_message(message.chat.id, message.message_id)
         await bot.delete_message(message.chat.id, data["pr_message_id"])
         await bot.send_message(
@@ -774,10 +771,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user.set_manager(0)
 
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
-        msg_text = tt.user_info(
-            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
-            selected_user.is_admin(), selected_user.is_manager()
-        )
+        msg_text = tt.user_info(selected_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "removeAdmin":
@@ -785,10 +779,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user.set_admin(0)
 
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
-        msg_text = tt.user_info(
-            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
-            selected_user.is_admin(), selected_user.is_manager()
-        )
+        msg_text = tt.user_info(selected_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "makeManager":
@@ -796,10 +787,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user.set_manager(1)
 
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
-        msg_text = tt.user_info(
-            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
-            selected_user.is_admin(), selected_user.is_manager()
-        )
+        msg_text = tt.user_info(selected_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "removeManager":
@@ -807,10 +795,7 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
         selected_user.set_manager(0)
 
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
-        msg_text = tt.user_info(
-            selected_user.get_id(), selected_user.get_username(), selected_user.is_main_admin(),
-            selected_user.is_admin(), selected_user.is_manager()
-        )
+        msg_text = tt.user_info(selected_user)
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
@@ -966,8 +951,6 @@ async def get_amount(message: types.Message, state: FSMContext):
             pr_message={"chat_id": msg.chat.id, "id": msg.message_id},
             item_id=item.get_id()
         )
-
-# TODO cart check for customer
 
 
 # User profile callback handler

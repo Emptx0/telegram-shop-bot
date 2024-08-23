@@ -56,6 +56,7 @@ class User:
     def add_to_cart(self, item_id, amount):
         for i in range(int(amount)):
             cart = self.get_cart()
+            print(self.get_cart())
             cursor.execute(
                 f"UPDATE users SET cart=? WHERE user_id=?",
                 [",".join([str(item.get_id()) for item in cart + [itm.Item(item_id)]]) if cart else str(item_id),

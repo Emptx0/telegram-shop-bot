@@ -1,9 +1,7 @@
 from aiogram import types
-from collections import deque
 
 import text_templates as tt
 import user as usr
-import category
 
 
 # Main Menu
@@ -232,11 +230,28 @@ def user_management_markup(user: usr.User, main_admin_access):
 
 
 # Profile
-def profile_markup(user: usr):
+def profile_markup():
     profile_buttons = [
         [types.InlineKeyboardButton(text=tt.my_orders, callback_data="profile_orders")],
         [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=profile_buttons)
+    return markup
+
+
+# Cart
+def get_cart(cart_items_list):
+    cart_buttons = list()
+
+    for item, in cart_items_list:
+        cart_buttons.append([
+            types.InlineKeyboardButton(
+                text=f"{item.get_name()}",
+                callback_data=f"cart_viewItem_{item.get_id()}"
+            )
+        ])
+    cart_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_back")])
+
+    markup = types.InlineKeyboardMarkup(inline_keyboard=cart_buttons)
     return markup

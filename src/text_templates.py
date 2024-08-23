@@ -1,4 +1,5 @@
 import item as itm
+import user as usr
 
 
 # Main menu
@@ -8,7 +9,7 @@ greeting = "<b>Welcome to telegram shop bot!</b>"
 admin_panel = "🅰️ Admin Panel"
 view_orders = "📂 View Orders"
 catalogue = "🗄️ Catalogue"
-profile = "👤 My Profile"
+profile = "👤 Profile"
 cart = "🛒 Cart"
 
 back = "⬅️ Back"
@@ -90,12 +91,12 @@ def get_users(users_list: list):
     return msg_text
 
 
-def user_info(user_id, username, is_main_admin, is_admin, is_manager) -> str:
-    msg_text = (f"User ID: <b>{user_id}</b>\n"
-                f"Username: @{username}\n"
-                f"Status: %s" % ("Main Admin" if is_main_admin else
-                                 "Admin" if is_admin else
-                                 "Manager" if is_manager else "Customer"))
+def user_info(user: usr.User) -> str:
+    msg_text = (f"User ID: <b>{user.get_id()}</b>\n"
+                f"Username: @{user.get_username()}\n"
+                f"Status: %s" % ("Main Admin" if user.is_main_admin() else
+                                 "Admin" if user.is_admin() else
+                                 "Manager" if user.is_manager() else "Customer"))
     return msg_text
 
 
@@ -116,9 +117,9 @@ my_orders = "📂 My Orders"
 cancel_order = "❌ Cancel Order"
 
 
-def profile_info(user_first_name, is_main_admin, is_admin, is_manager):
+def profile_info(user_first_name, user: usr.User):
     msg_text = (f"Hi, <b>{user_first_name}</b>!\n"
-                f"Status: %s" % ("Main Admin" if is_main_admin else
-                                 "Admin" if is_admin else
-                                 "Manager" if is_manager else "Customer"))
+                f"Status: %s" % ("Main Admin" if user.is_main_admin() else
+                                 "Admin" if user.is_admin() else
+                                 "Manager" if user.is_manager() else "Customer"))
     return msg_text

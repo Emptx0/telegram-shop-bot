@@ -20,14 +20,14 @@ user_management = "🧍 User Management"
 
 # Item management
 select_cat = "📂 Select Category"
-create_cat: list = ["➕ Create New Category", "✅ Category created successfully!"]
-rename_cat: list = ["✏️ Rename Category", "✅ Category renamed successfully!"]
-delete_cat: list = ["🗑️ Delete Category", "✅ Category deleted successfully!"]
+create_cat: list = ["➕ Create New Category", "✅ Category has been created successfully!"]
+rename_cat: list = ["✏️ Rename Category", "✅ Category has been renamed successfully!"]
+delete_cat: list = ["🗑️ Delete Category", "✅ Category has been deleted successfully!"]
 get_cats_list = "📄 Categories List"
 
 get_items_list = "📄 Items List"
 manage_items = "📝 Manage Items"
-add_item: list = ["➕ Add Item", "✅ Item added successfully!"]
+add_item: list = ["➕ Add Item", "✅ Item has been added successfully!"]
 
 
 def cat_info(cat_id, cat_name):
@@ -45,20 +45,20 @@ def get_cats(cat_list: list):
     return msg_text
 
 
-rename_item: list = ["✏️ Rename Item", "✅ Item renamed successfully!"]
-change_price: list = ["💵 Change Price", "✅ Price changed successfully!"]
-change_desc: list = ["📝 Change Description", "✅ Description changed successfully!"]
-change_amount: list = ["✖️ Change Amount", "✅ Amount changed successfully!"]
-upload_image: list = ["⬆️ Upload New Image", "✅ Image uploaded successfully!"]
-delete_image: list = ["🗑️ Delete Image", "✅ Image deleted successfully!"]
-delete_item: list = ["🗑️ Delete Item", "✅ Item deleted successfully!"]
+rename_item: list = ["✏️ Rename Item", "✅ Name has been changed successfully!"]
+change_price: list = ["💵 Change Price", "✅ Price has been changed successfully!"]
+change_desc: list = ["📝 Change Description", "✅ Description has been changed successfully!"]
+change_amount: list = ["✖️ Change Amount", "✅ Amount has been changed successfully!"]
+upload_image: list = ["⬆️ Upload New Image", "✅ Image has been uploaded successfully!"]
+delete_image: list = ["🗑️ Delete Image", "✅ Image has been deleted successfully!"]
+delete_item: list = ["🗑️ Delete Item", "✅ Item has been deleted successfully!"]
 
 
 def item_info(selected_item: itm.Item):
-    msg_text = (f"ID: <b>{selected_item.get_id()}</b>\n"
-                f"Name: {selected_item.get_name()}\n"
-                f"Price: {selected_item.get_price()}\n"
-                f"Amount: {selected_item.get_amount()}\n"
+    msg_text = (f"ID - <b>{selected_item.get_id()}</b>\n"
+                f"Name - {selected_item.get_name()}\n"
+                f"Price - {selected_item.get_price()}\n"
+                f"Amount - {selected_item.get_amount()}\n"
                 f"Description: {selected_item.get_desc()}\n")
     return msg_text
 
@@ -92,22 +92,22 @@ def get_users(users_list: list):
 
 
 def user_info(user: usr.User) -> str:
-    msg_text = (f"User ID: <b>{user.get_id()}</b>\n"
-                f"Username: @{user.get_username()}\n"
-                f"Status: %s" % ("Main Admin" if user.is_main_admin() else
-                                 "Admin" if user.is_admin() else
-                                 "Manager" if user.is_manager() else "Customer"))
+    msg_text = (f"User ID - <b>{user.get_id()}</b>\n"
+                f"Username - @{user.get_username()}\n"
+                f"Status - %s" % ("Main Admin" if user.is_main_admin() else
+                                  "Admin" if user.is_admin() else
+                                  "Manager" if user.is_manager() else "Customer"))
     return msg_text
 
 
 # View Item
-add_to_cart: list = ["🛒 Add To Cart", "✅ Item added to cart!"]
+add_to_cart: list = ["🛒 Add To Cart", "✅ Item has been added to cart!"]
 
 
 def item(selected_item: itm.Item):
-    msg_text = (f"Name: <b>{selected_item.get_name()}</b>\n"
-                f"Price: ${selected_item.get_price()}\n"
-                f"Amount: {selected_item.get_amount()}\n"
+    msg_text = (f"Name - <b>{selected_item.get_name()}</b>\n"
+                f"Price - ${selected_item.get_price()}\n"
+                f"Amount - {selected_item.get_amount()}\n"
                 f"Description: {selected_item.get_desc()}\n")
     return msg_text
 
@@ -122,4 +122,17 @@ def profile_info(user_first_name, user: usr.User):
                 f"Status: %s" % ("Main Admin" if user.is_main_admin() else
                                  "Admin" if user.is_admin() else
                                  "Manager" if user.is_manager() else "Customer"))
+    return msg_text
+
+
+# Cart
+cart_make_order = "📦 Make Order"
+cart_remove_item: list = ["❌ Remove Item", "✅ Item has been removed!"]
+
+
+def cart_item_info(selected_item: itm.Item, amount):
+    price = selected_item.get_price() * int(amount)
+    msg_text = (f"Name - <b>{selected_item.get_name()}</b>\n"
+                f"Price for <i>{amount}</i> - <b>${price}</b>\n"
+                f"Description: {selected_item.get_desc()}\n")
     return msg_text

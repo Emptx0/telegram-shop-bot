@@ -53,10 +53,15 @@ class User:
         cursor.execute("UPDATE users SET is_manager=? WHERE user_id=?", [value, self.get_id()])
         connection.commit()
 
+    def remove_from_cart(self, item_id):
+        cart = [item.get_id() for item in self.get_cart()]
+        cart.remove(str(item_id))
+        cursor.execute(f"UPDATE users SET cart=? WHERE user_id=?", [",".join(cart) if cart else "None", self.get_id()])
+        connection.commit()
+
     def add_to_cart(self, item_id, amount):
         for i in range(int(amount)):
             cart = self.get_cart()
-            print(self.get_cart())
             cursor.execute(
                 f"UPDATE users SET cart=? WHERE user_id=?",
                 [",".join([str(item.get_id()) for item in cart + [itm.Item(item_id)]]) if cart else str(item_id),

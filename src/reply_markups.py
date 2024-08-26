@@ -241,17 +241,46 @@ def profile_markup():
 
 
 # Cart
+def back_to_main_menu_markup():
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")]]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+    return markup
+
+
 def get_cart(cart_items_list):
     cart_buttons = list()
+    set_of_items = set()
+    for i in cart_items_list:
+        if i.get_id() not in set_of_items:
+            set_of_items.add(i.get_id())
+            amount = 0
+            for j in cart_items_list:
+                if i.get_id() == j.get_id():
+                    amount += 1
+            cart_buttons.append([
+                types.InlineKeyboardButton(
+                    text=f"{i.get_name()} - {amount}",
+                    callback_data=f"cart_viewItem_{i.get_id()}_{amount}"
+                )
+            ])
 
-    for item, in cart_items_list:
-        cart_buttons.append([
-            types.InlineKeyboardButton(
-                text=f"{item.get_name()}",
-                callback_data=f"cart_viewItem_{item.get_id()}"
-            )
-        ])
-    cart_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_back")])
+    cart_buttons.append([types.InlineKeyboardButton(text=tt.cart_make_order, callback_data=f"cart_makeOrder")])
+    cart_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"cart_back")])
 
     markup = types.InlineKeyboardMarkup(inline_keyboard=cart_buttons)
+    return markup
+
+
+def cart_item_view(item_id):
+    buttons = [
+        [types.InlineKeyboardButton(text=tt.cart_remove_item[0], callback_data=f"cart_removeItem_{item_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=buttons)
+    return markup
+
+
+def back_to_cart():
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup

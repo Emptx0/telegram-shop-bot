@@ -92,10 +92,15 @@ async def callbacks_main(callback: types.CallbackQuery):
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "cart":
-        user_id = callback.from_user.id
-
-        # TODO cart check for customer
-
+        user = usr.User(callback.from_user.id)
+        if not user.get_cart():
+            markup = rm.back_to_main_menu_markup()
+            msg_text = (f"{tt.cart}:\n\n"
+                        f"Your cart is empty.")
+        else:
+            markup = rm.get_cart(user.get_cart())
+            msg_text = f"{tt.cart}:"
+        await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
 
@@ -844,7 +849,6 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
 
         if item.get_image_id() == 0:
             await update_menu_text(callback.message, markup, msg_text)
-            await state.clear()
         else:
             data = await state.get_data()
             await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
@@ -892,6 +896,12 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
+
+
+# Viewing item
+@dp.message(sh.CustomerStates.viewing_item)
+async def item_view_chat_filter(message: types.Message):
+    await bot.delete_message(message.chat.id, message.message_id)
 
 
 # Add to cart
@@ -965,6 +975,83 @@ async def callbacks_profile(callback: types.CallbackQuery):
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
+
+
+# Cart callback handler
+@dp.callback_query(F.data.startswith("cart_"))
+async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
+    action = callback.data.split("_")[1]
+
+    if action == "viewItem":
+        item = itm.Item(callback.data.split("_")[2])
+        markup = rm.cart_item_view(item.get_id())
+        msg_text = tt.cart_item_info(item, callback.data.split("_")[3])
+        await state.set_state(sh.CustomerStates.viewing_item)
+        await state.update_data(pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id})
+
+        if item.get_image_id() == 0:
+            await update_menu_text(callback.message, markup, msg_text)
+        else:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            msg = await bot.send_photo(
+                chat_id=data["pr_message"]["chat_id"],
+                photo=FSInputFile(item.get_image_path()),
+                caption=msg_text,
+                reply_markup=markup
+            )
+            await state.update_data(pr_message={"chat_id": msg.chat.id, "id": msg.message_id})
+
+    if action == "removeItem":
+        item = itm.Item(callback.data.split("_")[2])
+        user = usr.User(callback.from_user.id)
+        user.remove_from_cart(item.get_id())
+
+        markup = rm.back_to_cart()
+        msg_text = tt.cart_remove_item[1]
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+
+            # TODO orders
+
+    if action == "backToCart":
+        user = usr.User(callback.from_user.id)
+        if not user.get_cart():
+            markup = rm.back_to_main_menu_markup()
+            msg_text = (f"{tt.cart}:\n\n"
+                        f"Your cart is empty.")
+        else:
+            markup = rm.get_cart(user.get_cart())
+            msg_text = f"{tt.cart}:"
+
+        try:
+            await update_menu_text(callback.message, markup, msg_text)
+            await state.clear()
+        except:
+            data = await state.get_data()
+            await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
+            await bot.send_message(
+                chat_id=data["pr_message"]["chat_id"],
+                text=msg_text,
+                reply_markup=markup
+            )
+
+        await state.clear()
+
+    if action == "back":
+        markup = rm.main_menu_markup(usr.User(callback.from_user.id))
+        msg_text = tt.greeting
+        await update_menu_text(callback.message, markup, msg_text)
 
 
 if __name__ == "__main__":

@@ -20,6 +20,7 @@ import reply_markups as rm
 import text_templates as tt
 import category
 import item as itm
+import order as ord
 
 
 configuration = configparser.ConfigParser()
@@ -78,9 +79,9 @@ async def callbacks_main(callback: types.CallbackQuery):
 
     if action == "catalogue":
         cursor.execute('SELECT id, name FROM categories')
-        cats_list = cursor.fetchall()
+        cat_list = cursor.fetchall()
 
-        markup = rm.catalogue_cats_markup(cats_list)
+        markup = rm.catalogue_cats_markup(cat_list)
         msg_text = (f"{tt.catalogue}\n\n"
                     f"Select category:")
         await update_menu_text(callback.message, markup, msg_text)
@@ -155,10 +156,10 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
 
     if action == "getCats":
         cursor.execute('SELECT id, name FROM categories')
-        cats_list = cursor.fetchall()
+        cat_list = cursor.fetchall()
 
         markup = rm.select_cat_markup()
-        msg_text = tt.get_cats(cats_list)
+        msg_text = tt.get_cats(cat_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -199,10 +200,10 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
 
     if action == "back":
         cursor.execute('SELECT id, name FROM categories')
-        cats_list = cursor.fetchall()
+        cat_list = cursor.fetchall()
 
         markup = rm.select_cat_markup()
-        msg_text = tt.get_cats(cats_list)
+        msg_text = tt.get_cats(cat_list)
 
         await state.update_data(pr_message_id=callback.message.message_id)
         await state.set_state(sh.AdminStates.choosing_cat)
@@ -213,10 +214,10 @@ async def callbacks_item_management(callback: types.CallbackQuery, state: FSMCon
     if action == "getItems":
         cat_id = callback.data.split("_")[2]
         cursor.execute('SELECT id, name FROM items WHERE cat_id=?', [cat_id])
-        items_list = cursor.fetchall()
+        item_list = cursor.fetchall()
 
         markup = rm.select_item_markup(cat_id)
-        msg_text = tt.get_items(items_list)
+        msg_text = tt.get_items(item_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -755,19 +756,19 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
 
     if action == "getAdmins":
         cursor.execute('SELECT user_id, username FROM users WHERE is_admin=?', (1,))
-        admins_list = cursor.fetchall()
+        admin_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = tt.get_admins_list + tt.get_users(admins_list)
+        msg_text = tt.get_admin_list + tt.get_users(admin_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
     if action == "getManagers":
         cursor.execute('SELECT user_id, username FROM users WHERE is_manager=?', (1,))
-        managers_list = cursor.fetchall()
+        manager_list = cursor.fetchall()
 
         markup = rm.select_user_markup(usr.User(callback.from_user.id))
-        msg_text = tt.get_managers_list + tt.get_users(managers_list)
+        msg_text = tt.get_manager_list + tt.get_users(manager_list)
 
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -821,9 +822,9 @@ async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
     if action == "viewCat":
         cat_id = callback.data.split("_")[2]
         cursor.execute('SELECT id, name, price FROM items WHERE cat_id=?', [cat_id])
-        items_list = cursor.fetchall()
+        item_list = cursor.fetchall()
 
-        markup = rm.catalogue_items_markup(items_list)
+        markup = rm.catalogue_items_markup(item_list)
         msg_text = (f"{tt.catalogue}\n\n"
                     f"Select item:")
 
@@ -1022,7 +1023,17 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
                 reply_markup=markup
             )
 
-            # TODO orders
+    if action == "makeOrder":
+        markup = rm.back_to_cart()
+        msg_text = "Enter your email address:"
+
+        await state.update_data(
+            pr_message_id=callback.message.message_id,
+            chat_id=callback.message.chat.id,
+        )
+        await state.set_state(sh.CustomerStates.email_address)
+
+        await update_menu_text(callback.message, markup, msg_text)
 
     if action == "backToCart":
         user = usr.User(callback.from_user.id)
@@ -1053,6 +1064,50 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
 
+
+@dp.message(sh.CustomerStates.email_address, F.text)
+async def get_user_email_address(message: types.Message, state: FSMContext):
+    data = await state.get_data()
+
+    markup = rm.back_to_cart()
+    msg_text = "Enter your home address:"
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    msg = await bot.send_message(
+        chat_id=message.chat.id,
+        text=msg_text,
+        reply_markup=markup
+    )
+    await state.update_data(pr_message_id=msg.message_id, email_address=message.text)
+    await state.set_state(sh.CustomerStates.home_address)
+
+
+@dp.message(sh.CustomerStates.home_address, F.text)
+async def get_user_home_address(message: types.Message, state: FSMContext):
+    await state.update_data(home_address=message.text)
+    user = usr.User(message.from_user.id)
+
+    markup = rm.back_to_main_menu_markup()
+    msg_text = tt.cart_make_order[1]
+
+    data = await state.get_data()
+    await bot.delete_message(message.chat.id, message.message_id)
+    await bot.delete_message(message.chat.id, data["pr_message_id"])
+    await bot.send_message(
+        chat_id=message.chat.id,
+        text=msg_text,
+        reply_markup=markup
+    )
+
+    while True:
+        order_id = randint(100000, 999999)
+        if not ord.order_exists(order_id):
+            break
+
+    ord.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
+    await state.clear()
+
+# TODO order cancel and view
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

@@ -23,9 +23,9 @@ select_cat = "📂 Select Category"
 create_cat: list = ["➕ Create New Category", "✅ Category has been created successfully!"]
 rename_cat: list = ["✏️ Rename Category", "✅ Category has been renamed successfully!"]
 delete_cat: list = ["🗑️ Delete Category", "✅ Category has been deleted successfully!"]
-get_cats_list = "📄 Categories List"
+get_cat_list = "📄 Categories List"
 
-get_items_list = "📄 Items List"
+get_item_list = "📄 Items List"
 manage_items = "📝 Manage Items"
 add_item: list = ["➕ Add Item", "✅ Item has been added successfully!"]
 
@@ -37,7 +37,7 @@ def cat_info(cat_id, cat_name):
 
 
 def get_cats(cat_list: list):
-    msg_text = (f"{get_cats_list}:\n\n"
+    msg_text = (f"{get_cat_list}:\n\n"
                 f"<b>ID : Name</b>\n")
     for cat_id, cat_name in cat_list:
         msg_text += f"{cat_id} : {cat_name}\n"
@@ -63,18 +63,18 @@ def item_info(selected_item: itm.Item):
     return msg_text
 
 
-def get_items(items_list: list):
-    msg_text = (f"{get_items_list}:\n\n"
+def get_items(item_list: list):
+    msg_text = (f"{get_item_list}:\n\n"
                 f"<b>ID : Name</b>\n")
-    for item_id, item_name in items_list:
+    for item_id, item_name in item_list:
         msg_text += f"{item_id} : {item_name}\n"
     msg_text += "\nEnter ID of the item you want to manage:"
     return msg_text
 
 
 # User management
-get_admins_list = "🔴 Admins list"
-get_managers_list = "🔵 Managers list"
+get_admin_list = "🔴 Admins list"
+get_manager_list = "🔵 Managers list"
 
 make_admin = "🔴 Give Admin Role"
 make_manager = "🔵 Give Manager Role"
@@ -83,9 +83,9 @@ remove_admin = "🔴 Remove Admin Role"
 remove_manager = "🔵 Remove Manager Role"
 
 
-def get_users(users_list: list):
+def get_users(user_list: list):
     msg_text = f"\n\n<b>ID : Username</b>\n"
-    for user_id, username in users_list:
+    for user_id, username in user_list:
         msg_text += f"{user_id} : @{username}\n"
     msg_text += "\nEnter user ID you want to manage:"
     return msg_text
@@ -126,7 +126,7 @@ def profile_info(user_first_name, user: usr.User):
 
 
 # Cart
-cart_make_order = "📦 Make Order"
+cart_make_order: list = ["📦 Make Order", "✅ Order has been placed!"]
 cart_remove_item: list = ["❌ Remove Item", "✅ Item has been removed!"]
 
 

@@ -1,7 +1,8 @@
 import sqlite3
 
 from configuration import Configuration
-import item as itm
+from item import Item
+from order import Order
 
 connection = sqlite3.connect('data.db')
 cursor = connection.cursor()
@@ -19,12 +20,12 @@ class User:
             )
             connection.commit()
 
+    def get_id(self):
+        return self.__user_id
+
     def __clist(self):
         cursor.execute("SELECT * FROM users WHERE user_id=?", [self.get_id()])
         return list(cursor)[0]
-
-    def get_id(self):
-        return self.__user_id
 
     def get_username(self):
         return self.__clist()[1]
@@ -34,7 +35,11 @@ class User:
 
     def get_cart(self):
         cart = self.get_cart_comma()
-        return [] if cart == "None" else list(map(itm.Item, cart.split(",")))
+        return [] if cart == "None" else list(map(Item, cart.split(",")))
+
+    def get_orders(self):
+        cursor.execute("SELECT * FROM orders WHERE user_id=?", [self.get_id()])
+        return list(map(Order, [order[0] for order in list(cursor)]))[::-1]
 
     def is_main_admin(self):
         return str(self.__user_id) == str(config.get_main_admin_id())
@@ -64,7 +69,7 @@ class User:
             cart = self.get_cart()
             cursor.execute(
                 f"UPDATE users SET cart=? WHERE user_id=?",
-                [",".join([str(item.get_id()) for item in cart + [itm.Item(item_id)]]) if cart else str(item_id),
+                [",".join([str(item.get_id()) for item in cart + [Item(item_id)]]) if cart else str(item_id),
                  self.get_id()]
                 )
             connection.commit()

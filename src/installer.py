@@ -52,8 +52,8 @@ CREATE_ORDERS_TEXT = """
         "order_id" INTEGER,
         "user_id" INTEGER,
         "item_list" TEXT,
-        "email_adress" TEXT,
-        "home_adress" TEXT,
+        "email_address" TEXT,
+        "home_address" TEXT,
         "date" TEXT,
         "status" INTEGER
     )

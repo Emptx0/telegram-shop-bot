@@ -9,12 +9,12 @@ class Item:
     def __init__(self, item_id):
         self.__item_id = item_id
 
+    def get_id(self):
+        return self.__item_id
+
     def __clist(self):
         cursor.execute(f"SELECT * FROM items WHERE id=?", [self.get_id()])
         return list(cursor)[0]
-
-    def get_id(self):
-        return self.__item_id
 
     def get_name(self):
         return self.__clist()[1]

@@ -26,10 +26,10 @@ def main_menu_markup(user: usr):
 
 
 # Catalogue
-def catalogue_cats_markup(cats_list):
+def catalogue_cats_markup(cat_list):
     catalogue_buttons = list()
 
-    for cat_id, cat_name in cats_list:
+    for cat_id, cat_name in cat_list:
         catalogue_buttons.append([types.InlineKeyboardButton(text=cat_name, callback_data=f"cat_viewCat_{cat_id}")])
     catalogue_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")])
 
@@ -37,10 +37,10 @@ def catalogue_cats_markup(cats_list):
     return markup
 
 
-def catalogue_items_markup(items_list):
+def catalogue_items_markup(item_list):
     category_buttons = list()
 
-    for item_id, item_name, item_price in items_list:
+    for item_id, item_name, item_price in item_list:
         category_buttons.append([
             types.InlineKeyboardButton(
                 text=f"{item_name} - ${item_price}",
@@ -97,7 +97,7 @@ def item_management_panel_markup(back=False):
 def select_item_markup(cat_id, back=False):
     if not back:
         select_item_buttons = [
-            [types.InlineKeyboardButton(text=tt.get_items_list, callback_data=f"im_getItems_{cat_id}")],
+            [types.InlineKeyboardButton(text=tt.get_item_list, callback_data=f"im_getItems_{cat_id}")],
             [types.InlineKeyboardButton(text=tt.back, callback_data=f"im_backToCat_{cat_id}")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=select_item_buttons)
@@ -110,7 +110,7 @@ def select_item_markup(cat_id, back=False):
 
 def select_cat_markup():
     select_cat_buttons = [
-        [types.InlineKeyboardButton(text=tt.get_cats_list, callback_data="im_getCats")],
+        [types.InlineKeyboardButton(text=tt.get_cat_list, callback_data="im_getCats")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=select_cat_buttons)
@@ -159,8 +159,8 @@ def item_management_back(item_id):
 def select_user_markup(user: usr.User):
     if user.is_main_admin():
         select_user_buttons = [
-            [types.InlineKeyboardButton(text=tt.get_admins_list, callback_data="um_getAdmins")],
-            [types.InlineKeyboardButton(text=tt.get_managers_list, callback_data="um_getManagers")],
+            [types.InlineKeyboardButton(text=tt.get_admin_list, callback_data="um_getAdmins")],
+            [types.InlineKeyboardButton(text=tt.get_manager_list, callback_data="um_getManagers")],
             [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=select_user_buttons)
@@ -168,7 +168,7 @@ def select_user_markup(user: usr.User):
 
     elif user.is_admin():
         select_user_buttons = [
-            [types.InlineKeyboardButton(text=tt.get_managers_list, callback_data="um_getManagers")],
+            [types.InlineKeyboardButton(text=tt.get_manager_list, callback_data="um_getManagers")],
             [types.InlineKeyboardButton(text=tt.back, callback_data="um_back")]
         ]
         markup = types.InlineKeyboardMarkup(inline_keyboard=select_user_buttons)
@@ -247,14 +247,14 @@ def back_to_main_menu_markup():
     return markup
 
 
-def get_cart(cart_items_list):
+def get_cart(cart_item_list):
     cart_buttons = list()
     set_of_items = set()
-    for i in cart_items_list:
+    for i in cart_item_list:
         if i.get_id() not in set_of_items:
             set_of_items.add(i.get_id())
             amount = 0
-            for j in cart_items_list:
+            for j in cart_item_list:
                 if i.get_id() == j.get_id():
                     amount += 1
             cart_buttons.append([
@@ -264,7 +264,7 @@ def get_cart(cart_items_list):
                 )
             ])
 
-    cart_buttons.append([types.InlineKeyboardButton(text=tt.cart_make_order, callback_data=f"cart_makeOrder")])
+    cart_buttons.append([types.InlineKeyboardButton(text=tt.cart_make_order[0], callback_data=f"cart_makeOrder")])
     cart_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"cart_back")])
 
     markup = types.InlineKeyboardMarkup(inline_keyboard=cart_buttons)

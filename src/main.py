@@ -1,5 +1,6 @@
 import asyncio
 import configparser
+import re
 import sqlite3
 import logging
 import os
@@ -20,7 +21,7 @@ import reply_markups as rm
 import text_templates as tt
 import category
 import item as itm
-import order as ord
+import order as ordr
 
 
 configuration = configparser.ConfigParser()
@@ -77,6 +78,13 @@ async def callbacks_main(callback: types.CallbackQuery):
         msg_text = tt.admin_panel
         await update_menu_text(callback.message, markup, msg_text)
 
+    if action == "viewOrders":
+        cursor.execute('SELECT order_id FROM orders')
+        order_list = list(cursor.fetchall())
+        markup = rm.get_orders_markup(order_list)
+        msg_text = tt.view_orders
+        await update_menu_text(callback.message, markup, msg_text)
+
     if action == "catalogue":
         cursor.execute('SELECT id, name FROM categories')
         cat_list = cursor.fetchall()
@@ -95,11 +103,11 @@ async def callbacks_main(callback: types.CallbackQuery):
     if action == "cart":
         user = usr.User(callback.from_user.id)
         if not user.get_cart():
-            markup = rm.back_to_main_menu_markup()
+            markup = rm.back_to_main_menu()
             msg_text = (f"{tt.cart}:\n\n"
                         f"Your cart is empty.")
         else:
-            markup = rm.get_cart(user.get_cart())
+            markup = rm.get_cart_markup(user.get_cart())
             msg_text = f"{tt.cart}:"
         await update_menu_text(callback.message, markup, msg_text)
 
@@ -814,6 +822,55 @@ async def callbacks_user_management(callback: types.CallbackQuery, state: FSMCon
     await callback.answer()
 
 
+# View Orders callback handler
+@dp.callback_query(F.data.startswith("management_"))
+async def callbacks_management(callback: types.CallbackQuery):
+    action = callback.data.split("_")[1]
+
+    if action == "viewOrder":
+        order = ordr.Order(callback.data.split("_")[2])
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "processing":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(0)
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "delivered":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(1)
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "done":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(2)
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "delivered":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(1)
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "canceled":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(-1)
+        markup = rm.order_management_markup(order.get_id())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
+
+
 # Catalogue callback handler
 @dp.callback_query(F.data.startswith("cat_"))
 async def callbacks_catalogue(callback: types.CallbackQuery, state: FSMContext):
@@ -970,6 +1027,36 @@ async def get_amount(message: types.Message, state: FSMContext):
 async def callbacks_profile(callback: types.CallbackQuery):
     action = callback.data.split("_")[1]
 
+    if action == "orders":
+        user = usr.User(callback.from_user.id)
+        if not user.get_orders():
+            markup = rm.back_to_main_menu()
+            msg_text = (f"{tt.my_orders}:\n\n"
+                        f"You have no orders yet.")
+        else:
+            markup = rm.get_user_orders_markup(user.get_orders())
+            msg_text = f"{tt.my_orders}:"
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "viewOrder":
+        order = ordr.Order(callback.data.split("_")[2])
+        markup = rm.order_markup(order.get_id(), order.get_status())
+        msg_text = tt.order_info(order)
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "cancelOrder":
+        order = ordr.Order(callback.data.split("_")[2])
+        order.set_status(-1)
+        markup = rm.back_to_profile()
+        msg_text = tt.cancel_order[1]
+        await update_menu_text(callback.message, markup, msg_text)
+
+    if action == "back_to_profile":
+        user = usr.User(callback.from_user.id)
+        markup = rm.profile_markup()
+        msg_text = tt.profile_info(callback.from_user.first_name, user)
+        await update_menu_text(callback.message, markup, msg_text)
+
     if action == "back":
         markup = rm.main_menu_markup(usr.User(callback.from_user.id))
         msg_text = tt.greeting
@@ -985,7 +1072,7 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
 
     if action == "viewItem":
         item = itm.Item(callback.data.split("_")[2])
-        markup = rm.cart_item_view(item.get_id())
+        markup = rm.cart_item_view_markup(item.get_id())
         msg_text = tt.cart_item_info(item, callback.data.split("_")[3])
         await state.set_state(sh.CustomerStates.viewing_item)
         await state.update_data(pr_message={"chat_id": callback.message.chat.id, "id": callback.message.message_id})
@@ -1038,11 +1125,11 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
     if action == "backToCart":
         user = usr.User(callback.from_user.id)
         if not user.get_cart():
-            markup = rm.back_to_main_menu_markup()
+            markup = rm.back_to_main_menu()
             msg_text = (f"{tt.cart}:\n\n"
                         f"Your cart is empty.")
         else:
-            markup = rm.get_cart(user.get_cart())
+            markup = rm.get_cart_markup(user.get_cart())
             msg_text = f"{tt.cart}:"
 
         try:
@@ -1065,6 +1152,7 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
         await update_menu_text(callback.message, markup, msg_text)
 
 
+# Place Order
 @dp.message(sh.CustomerStates.email_address, F.text)
 async def get_user_email_address(message: types.Message, state: FSMContext):
     data = await state.get_data()
@@ -1087,7 +1175,7 @@ async def get_user_home_address(message: types.Message, state: FSMContext):
     await state.update_data(home_address=message.text)
     user = usr.User(message.from_user.id)
 
-    markup = rm.back_to_main_menu_markup()
+    markup = rm.back_to_main_menu()
     msg_text = tt.cart_make_order[1]
 
     data = await state.get_data()
@@ -1101,13 +1189,15 @@ async def get_user_home_address(message: types.Message, state: FSMContext):
 
     while True:
         order_id = randint(100000, 999999)
-        if not ord.order_exists(order_id):
+        if not ordr.order_exists(order_id):
             break
 
-    ord.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
+    ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
+    for item in user.get_cart():
+        user.remove_from_cart(item.get_id())
+
     await state.clear()
 
-# TODO order cancel and view
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

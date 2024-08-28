@@ -1,8 +1,8 @@
 import sqlite3
 
 from configuration import Configuration
-from item import Item
-from order import Order
+import item as itm
+import order as ordr
 
 connection = sqlite3.connect('data.db')
 cursor = connection.cursor()
@@ -35,11 +35,11 @@ class User:
 
     def get_cart(self):
         cart = self.get_cart_comma()
-        return [] if cart == "None" else list(map(Item, cart.split(",")))
+        return [] if cart == "None" else list(map(itm.Item, cart.split(",")))
 
     def get_orders(self):
         cursor.execute("SELECT * FROM orders WHERE user_id=?", [self.get_id()])
-        return list(map(Order, [order[0] for order in list(cursor)]))[::-1]
+        return list(map(ordr.Order, [order[0] for order in list(cursor)]))[::-1]
 
     def is_main_admin(self):
         return str(self.__user_id) == str(config.get_main_admin_id())
@@ -69,7 +69,7 @@ class User:
             cart = self.get_cart()
             cursor.execute(
                 f"UPDATE users SET cart=? WHERE user_id=?",
-                [",".join([str(item.get_id()) for item in cart + [Item(item_id)]]) if cart else str(item_id),
+                [",".join([str(item.get_id()) for item in cart + [itm.Item(item_id)]]) if cart else str(item_id),
                  self.get_id()]
                 )
             connection.commit()

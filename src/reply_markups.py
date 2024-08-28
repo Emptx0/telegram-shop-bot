@@ -1,3 +1,5 @@
+import re
+
 from aiogram import types
 
 import text_templates as tt
@@ -65,6 +67,35 @@ def item_markup(item_id, cat_id):
 def back_to_item_markup(item_id):
     back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data=f"cat_viewItem_{item_id}")]]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+    return markup
+
+
+# View Orders Panel
+def get_orders_markup(order_list):
+    order_buttons = list()
+
+    for order_id in order_list:
+        order_buttons.append([
+            types.InlineKeyboardButton(
+                text=f"Order - {[*order_id][0]}",
+                callback_data=f"management_viewOrder_{[*order_id][0]}"
+            )
+        ])
+    order_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")])
+
+    markup = types.InlineKeyboardMarkup(inline_keyboard=order_buttons)
+    return markup
+
+
+def order_management_markup(order_id):
+    order_buttons = [
+        [types.InlineKeyboardButton(text=tt.set_status_processing, callback_data=f"management_processing_{order_id}")],
+        [types.InlineKeyboardButton(text=tt.set_status_delivered, callback_data=f"management_delivered_{order_id}")],
+        [types.InlineKeyboardButton(text=tt.set_status_done, callback_data=f"management_done_{order_id}")],
+        [types.InlineKeyboardButton(text=tt.set_status_canceled, callback_data=f"management_canceled_{order_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=order_buttons)
     return markup
 
 
@@ -233,21 +264,53 @@ def user_management_markup(user: usr.User, main_admin_access):
 def profile_markup():
     profile_buttons = [
         [types.InlineKeyboardButton(text=tt.my_orders, callback_data="profile_orders")],
-        [types.InlineKeyboardButton(text=tt.cancel_order, callback_data="profile_cancelOrder")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="profile_back")]
     ]
     markup = types.InlineKeyboardMarkup(inline_keyboard=profile_buttons)
     return markup
 
 
+def get_user_orders_markup(order_list):
+    order_buttons = list()
+    for order in order_list:
+        order_buttons.append([
+            types.InlineKeyboardButton(
+                text=f"Order - {order.get_id()}",
+                callback_data=f"profile_viewOrder_{order.get_id()}"
+            )
+        ])
+    order_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data="main_profile")])
+
+    markup = types.InlineKeyboardMarkup(inline_keyboard=order_buttons)
+    return markup
+
+
+def order_markup(order_id, order_status):
+    if order_status != -1:
+        orders_buttons = [
+            [types.InlineKeyboardButton(text=tt.cancel_order[0], callback_data=f"profile_cancelOrder_{order_id}")],
+            [types.InlineKeyboardButton(text=tt.back, callback_data="main_profile")]
+        ]
+    else:
+        orders_buttons = [[types.InlineKeyboardButton(text=tt.back, callback_data="main_profile")]]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=orders_buttons)
+    return markup
+
+
+def back_to_profile():
+    back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="main_profile")]]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
+    return markup
+
+
 # Cart
-def back_to_main_menu_markup():
+def back_to_main_menu():
     back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="cat_back")]]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
 
 
-def get_cart(cart_item_list):
+def get_cart_markup(cart_item_list):
     cart_buttons = list()
     set_of_items = set()
     for i in cart_item_list:
@@ -263,7 +326,6 @@ def get_cart(cart_item_list):
                     callback_data=f"cart_viewItem_{i.get_id()}_{amount}"
                 )
             ])
-
     cart_buttons.append([types.InlineKeyboardButton(text=tt.cart_make_order[0], callback_data=f"cart_makeOrder")])
     cart_buttons.append([types.InlineKeyboardButton(text=tt.back, callback_data=f"cart_back")])
 
@@ -271,7 +333,7 @@ def get_cart(cart_item_list):
     return markup
 
 
-def cart_item_view(item_id):
+def cart_item_view_markup(item_id):
     buttons = [
         [types.InlineKeyboardButton(text=tt.cart_remove_item[0], callback_data=f"cart_removeItem_{item_id}")],
         [types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]

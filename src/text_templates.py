@@ -1,5 +1,6 @@
 import item as itm
 import user as usr
+import order as ordr
 
 
 # Main menu
@@ -30,13 +31,13 @@ manage_items = "📝 Manage Items"
 add_item: list = ["➕ Add Item", "✅ Item has been added successfully!"]
 
 
-def cat_info(cat_id, cat_name):
+def cat_info(cat_id, cat_name) -> str:
     msg_text = (f"Category ID: <b>{cat_id}</b>\n"
                 f"Category name: {cat_name}")
     return msg_text
 
 
-def get_cats(cat_list: list):
+def get_cats(cat_list: list) -> str:
     msg_text = (f"{get_cat_list}:\n\n"
                 f"<b>ID : Name</b>\n")
     for cat_id, cat_name in cat_list:
@@ -54,7 +55,7 @@ delete_image: list = ["🗑️ Delete Image", "✅ Image has been deleted succes
 delete_item: list = ["🗑️ Delete Item", "✅ Item has been deleted successfully!"]
 
 
-def item_info(selected_item: itm.Item):
+def item_info(selected_item: itm.Item) -> str:
     msg_text = (f"ID - <b>{selected_item.get_id()}</b>\n"
                 f"Name - {selected_item.get_name()}\n"
                 f"Price - {selected_item.get_price()}\n"
@@ -63,7 +64,7 @@ def item_info(selected_item: itm.Item):
     return msg_text
 
 
-def get_items(item_list: list):
+def get_items(item_list: list) -> str:
     msg_text = (f"{get_item_list}:\n\n"
                 f"<b>ID : Name</b>\n")
     for item_id, item_name in item_list:
@@ -83,7 +84,7 @@ remove_admin = "🔴 Remove Admin Role"
 remove_manager = "🔵 Remove Manager Role"
 
 
-def get_users(user_list: list):
+def get_users(user_list: list) -> str:
     msg_text = f"\n\n<b>ID : Username</b>\n"
     for user_id, username in user_list:
         msg_text += f"{user_id} : @{username}\n"
@@ -104,7 +105,7 @@ def user_info(user: usr.User) -> str:
 add_to_cart: list = ["🛒 Add To Cart", "✅ Item has been added to cart!"]
 
 
-def item(selected_item: itm.Item):
+def item(selected_item: itm.Item) -> str:
     msg_text = (f"Name - <b>{selected_item.get_name()}</b>\n"
                 f"Price - ${selected_item.get_price()}\n"
                 f"Amount - {selected_item.get_amount()}\n"
@@ -114,14 +115,33 @@ def item(selected_item: itm.Item):
 
 # Profile
 my_orders = "📂 My Orders"
-cancel_order = "❌ Cancel Order"
+cancel_order: list = ["❌ Cancel Order", "✅ Order has been canceled!"]
 
 
-def profile_info(user_first_name, user: usr.User):
+def profile_info(user_first_name, user: usr.User) -> str:
     msg_text = (f"Hi, <b>{user_first_name}</b>!\n"
                 f"Status: %s" % ("Main Admin" if user.is_main_admin() else
                                  "Admin" if user.is_admin() else
                                  "Manager" if user.is_manager() else "Customer"))
+    return msg_text
+
+
+# Order
+set_status_processing = "🔄 Set processing status"
+set_status_delivered = "📦 Set delivered status"
+set_status_done = "✅ Set done status"
+set_status_canceled = "❌ Set canceled status"
+
+
+def order_info(order: ordr.Order) -> str:
+    msg_text = (f"ID - <b>{order.get_id()}</b>\n"
+                f"Date - {order.get_date()}\n"
+                f"Status - {order.get_status_string()}\n"
+                f"Email address - {order.get_email_address()}\n"
+                f"Home address - {order.get_home_address()}\n\n"
+                f"Items:\n"
+                f"{order.get_items_string()}")
+
     return msg_text
 
 
@@ -130,7 +150,7 @@ cart_make_order: list = ["📦 Make Order", "✅ Order has been placed!"]
 cart_remove_item: list = ["❌ Remove Item", "✅ Item has been removed!"]
 
 
-def cart_item_info(selected_item: itm.Item, amount):
+def cart_item_info(selected_item: itm.Item, amount) -> str:
     price = selected_item.get_price() * int(amount)
     msg_text = (f"Name - <b>{selected_item.get_name()}</b>\n"
                 f"Price for <i>{amount}</i> - <b>${price}</b>\n"

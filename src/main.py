@@ -1,6 +1,5 @@
 import asyncio
 import configparser
-import re
 import sqlite3
 import logging
 import os
@@ -22,6 +21,7 @@ import text_templates as tt
 import category
 import item as itm
 import order as ordr
+import cryptopay as cp
 
 
 configuration = configparser.ConfigParser()
@@ -1134,7 +1134,6 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
 
         try:
             await update_menu_text(callback.message, markup, msg_text)
-            await state.clear()
         except:
             data = await state.get_data()
             await bot.delete_message(data["pr_message"]["chat_id"], data["pr_message"]["id"])
@@ -1146,6 +1145,32 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
 
         await state.clear()
 
+    if action == "payWithUSDT":
+        user = usr.User(callback.from_user.id)
+        data = await state.get_data()
+
+        while True:
+            order_id = randint(100000, 999999)
+            if not ordr.order_exists(order_id):
+                break
+        ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
+        for item in user.get_cart():
+            user.remove_from_cart(item.get_id())
+
+        await state.clear()
+
+        currency = "USDT"
+        invoice_url, invoice_id = await cp.CryptoPay.create_invoice(ordr.Order(order_id).get_price(), currency)
+
+        markup = rm.payment_markup(ordr.Order(order_id).get_price(), invoice_url, invoice_id)
+        msg_text = tt.complete_payment
+        await update_menu_text(callback.message, markup, msg_text)
+
+        '''if action == "payWithTON":
+        markup = rm.payment_markup()
+        msg_text = tt.complete_payment
+        await update_menu_text(callback.message, markup, msg_text)'''
+
     if action == "back":
         markup = rm.main_menu_markup(usr.User(callback.from_user.id))
         msg_text = tt.greeting
@@ -1156,6 +1181,7 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
 @dp.message(sh.CustomerStates.email_address, F.text)
 async def get_user_email_address(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    await state.update_data(email_address=message.text)
 
     markup = rm.back_to_cart()
     msg_text = "Enter your home address:"
@@ -1166,37 +1192,27 @@ async def get_user_email_address(message: types.Message, state: FSMContext):
         text=msg_text,
         reply_markup=markup
     )
-    await state.update_data(pr_message_id=msg.message_id, email_address=message.text)
+    await state.update_data(pr_message_id=msg.message_id)
     await state.set_state(sh.CustomerStates.home_address)
 
 
 @dp.message(sh.CustomerStates.home_address, F.text)
 async def get_user_home_address(message: types.Message, state: FSMContext):
-    await state.update_data(home_address=message.text)
-    user = usr.User(message.from_user.id)
-
-    markup = rm.back_to_main_menu()
-    msg_text = tt.cart_make_order[1]
+    markup = rm.select_currency_markup()
+    msg_text = tt.select_currency
 
     data = await state.get_data()
+    await state.update_data(home_address=message.text)
     await bot.delete_message(message.chat.id, message.message_id)
     await bot.delete_message(message.chat.id, data["pr_message_id"])
-    await bot.send_message(
+    msg = await bot.send_message(
         chat_id=message.chat.id,
         text=msg_text,
         reply_markup=markup
     )
 
-    while True:
-        order_id = randint(100000, 999999)
-        if not ordr.order_exists(order_id):
-            break
-
-    ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
-    for item in user.get_cart():
-        user.remove_from_cart(item.get_id())
-
-    await state.clear()
+    await state.update_data(pr_message_id=msg.message_id)
+    await state.set_state(sh.CustomerStates.payment)
 
 
 if __name__ == "__main__":

@@ -140,7 +140,8 @@ def order_info(order: ordr.Order) -> str:
                 f"Email address - {order.get_email_address()}\n"
                 f"Home address - {order.get_home_address()}\n\n"
                 f"Items:\n"
-                f"{order.get_items_string()}")
+                f"{order.get_items_string()}\n\n"
+                f"Price - <b>{order.get_price()}</b>")
 
     return msg_text
 
@@ -148,6 +149,10 @@ def order_info(order: ordr.Order) -> str:
 # Cart
 cart_make_order: list = ["📦 Make Order", "✅ Order has been placed!"]
 cart_remove_item: list = ["❌ Remove Item", "✅ Item has been removed!"]
+select_currency = "💵 Select currency:"
+complete_payment = "⬇️ Complete payment"
+buy = "💰 Buy"
+check = "✅ Check"
 
 
 def cart_item_info(selected_item: itm.Item, amount) -> str:

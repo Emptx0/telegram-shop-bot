@@ -346,3 +346,23 @@ def back_to_cart():
     back_button = [[types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]]
     markup = types.InlineKeyboardMarkup(inline_keyboard=back_button)
     return markup
+
+
+def select_currency_markup():
+    buttons = [
+        [types.InlineKeyboardButton(text="USDT", callback_data=f"cart_payWithUSDT")],
+        [types.InlineKeyboardButton(text="TON", callback_data="cart_payWithTON")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=buttons)
+    return markup
+
+
+def payment_markup(order_id, invoice_url, invoice_id):
+    buttons = [
+        [types.InlineKeyboardButton(text=tt.buy, url=invoice_url)],
+        [types.InlineKeyboardButton(text=tt.check, callback_data=f"payment_{invoice_id}")],
+        [types.InlineKeyboardButton(text=tt.back, callback_data="cart_backToCart")]
+    ]
+    markup = types.InlineKeyboardMarkup(inline_keyboard=buttons)
+    return markup

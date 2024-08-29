@@ -4,9 +4,10 @@ from os.path import exists
 import sqlite3
 
 
-def create_config(token, main_admin_id, config_path="config.ini"):
+def create_config(token, cryptopay_token, main_admin_id, config_path="config.ini"):
     DEFAULT_CONFIG_TEXT = f"""[settings]
 token = {token}
+cryptopayToken = {cryptopay_token}
 main_admin_id = {main_admin_id}
 """
     with open(config_path, "w") as config:
@@ -88,6 +89,7 @@ if __name__ == "__main__":
 
     if conf.lower() in ["y", "yes"]:
         token = input("Enter bot token: ")
+        cryptopay_token = input("Enter cryptopay token: ")
         main_admin_id = input("Enter main admin id: ")
         if main_admin_id.isalnum():
             if exists("data.db"):
@@ -99,7 +101,7 @@ if __name__ == "__main__":
             if exists("config.ini"):
                 remove("config.ini")
                 print("Configuration file has been deleted.")
-            create_config(token, main_admin_id)
+            create_config(token, cryptopay_token, main_admin_id)
             print("Configuration file has been created.")
 
             if exists("images"):

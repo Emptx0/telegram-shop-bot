@@ -32,3 +32,6 @@ class CustomerStates(StatesGroup):
     # Order
     email_address = State()
     home_address = State()
+
+    select_currency = State()
+    payment = State()

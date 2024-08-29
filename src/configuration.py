@@ -1,5 +1,4 @@
 from configparser import ConfigParser
-import sqlite3
 
 
 class Configuration:
@@ -19,6 +18,9 @@ class Configuration:
 
     def get_token(self):
         return self.__read_config()["settings"]["token"]
+
+    def get_cryptopay_token(self):
+        return self.__read_config()["settings"]["cryptopayToken"]
 
     def set_token(self, token):
         self.__set_config("settings", "token", token)

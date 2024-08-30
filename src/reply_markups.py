@@ -286,7 +286,7 @@ def get_user_orders_markup(order_list):
 
 
 def order_markup(order_id, order_status):
-    if order_status != -1:
+    if order_status != -1 and order_status != 2:
         orders_buttons = [
             [types.InlineKeyboardButton(text=tt.cancel_order[0], callback_data=f"profile_cancelOrder_{order_id}")],
             [types.InlineKeyboardButton(text=tt.back, callback_data="main_profile")]

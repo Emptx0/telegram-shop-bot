@@ -140,7 +140,7 @@ def order_info(order: ordr.Order) -> str:
                 f"Email address - {order.get_email_address()}\n"
                 f"Home address - {order.get_home_address()}\n\n"
                 f"Items:\n"
-                f"{order.get_items_string()}\n\n"
+                f"{order.get_items_string()}\n"
                 f"Price - <b>{order.get_price()}</b>")
 
     return msg_text

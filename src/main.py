@@ -1236,6 +1236,10 @@ async def payment_check(callback: types.CallbackQuery, state: FSMContext):
 
         await callback.answer("✅ Successful payment, we processing your order!")
 
+        markup = rm.get_user_orders_markup(user.get_orders())
+        msg_text = f"{tt.my_orders}:"
+        await update_menu_text(callback.message, markup, msg_text)
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

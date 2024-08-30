@@ -358,7 +358,7 @@ def select_currency_markup():
     return markup
 
 
-def payment_markup(order_id, invoice_url, invoice_id):
+def payment_markup(invoice_url, invoice_id):
     buttons = [
         [types.InlineKeyboardButton(text=tt.buy, url=invoice_url)],
         [types.InlineKeyboardButton(text=tt.check, callback_data=f"payment_{invoice_id}")],

@@ -37,6 +37,18 @@ class User:
         cart = self.get_cart_comma()
         return [] if cart == "None" else list(map(itm.Item, cart.split(",")))
 
+    def get_cart_price(self):
+        item_list = self.get_cart_comma().split(',')
+        set_of_items = set()
+        for i in item_list:
+            if int(i) not in set_of_items:
+                set_of_items.add(int(i))
+                price = 0
+                for j in item_list:
+                    if int(i) == int(j):
+                        price += itm.Item(int(i)).get_price()
+        return price
+
     def get_orders(self):
         cursor.execute("SELECT * FROM orders WHERE user_id=?", [self.get_id()])
         return list(map(ordr.Order, [order[0] for order in list(cursor)]))[::-1]

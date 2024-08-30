@@ -151,7 +151,7 @@ cart_make_order: list = ["📦 Make Order", "✅ Order has been placed!"]
 cart_remove_item: list = ["❌ Remove Item", "✅ Item has been removed!"]
 select_currency = "💵 Select currency:"
 complete_payment = "⬇️ Complete payment"
-buy = "💰 Buy"
+buy = "💰 Pay"
 check = "✅ Check"
 
 

@@ -1,10 +1,9 @@
-import asyncio
 from aiocryptopay import AioCryptoPay, Networks, utils
 
 import configuration as c
 
 config = c.Configuration()
-crypto = AioCryptoPay(token=config.get_cryptopay_token(), network=Networks.MAIN_NET)
+crypto = AioCryptoPay(token=config.get_cryptopay_token(), network=Networks.TEST_NET)
 
 
 class CryptoPay:
@@ -25,5 +24,3 @@ class CryptoPay:
     async def get_status(invoice_id: int):
         invoices = await crypto.get_invoices(invoice_ids=invoice_id)
         return invoices.status
-
-# TODO authorize app

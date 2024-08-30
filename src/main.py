@@ -108,7 +108,8 @@ async def callbacks_main(callback: types.CallbackQuery):
                         f"Your cart is empty.")
         else:
             markup = rm.get_cart_markup(user.get_cart())
-            msg_text = f"{tt.cart}:"
+            msg_text = (f"{tt.cart}:\n"
+                        f"Price - <b>{user.get_cart_price()}</b>")
         await update_menu_text(callback.message, markup, msg_text)
 
     await callback.answer()
@@ -1130,7 +1131,8 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
                         f"Your cart is empty.")
         else:
             markup = rm.get_cart_markup(user.get_cart())
-            msg_text = f"{tt.cart}:"
+            msg_text = (f"{tt.cart}:\n"
+                        f"Price - <b>{user.get_cart_price()}</b>")
 
         try:
             await update_menu_text(callback.message, markup, msg_text)
@@ -1147,34 +1149,30 @@ async def callbacks_cart(callback: types.CallbackQuery, state: FSMContext):
 
     if action == "payWithUSDT":
         user = usr.User(callback.from_user.id)
-        data = await state.get_data()
-
-        while True:
-            order_id = randint(100000, 999999)
-            if not ordr.order_exists(order_id):
-                break
-        ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
-        for item in user.get_cart():
-            user.remove_from_cart(item.get_id())
-
-        await state.clear()
 
         currency = "USDT"
-        invoice_url, invoice_id = await cp.CryptoPay.create_invoice(ordr.Order(order_id).get_price(), currency)
+        invoice_url, invoice_id = await cp.CryptoPay.create_invoice(user.get_cart_price(), currency)
 
-        markup = rm.payment_markup(ordr.Order(order_id).get_price(), invoice_url, invoice_id)
+        markup = rm.payment_markup(invoice_url, invoice_id)
         msg_text = tt.complete_payment
         await update_menu_text(callback.message, markup, msg_text)
 
-        '''if action == "payWithTON":
-        markup = rm.payment_markup()
+    if action == "payWithTON":
+        user = usr.User(callback.from_user.id)
+
+        currency = "TON"
+        invoice_url, invoice_id = await cp.CryptoPay.create_invoice(user.get_cart_price(), currency)
+
+        markup = rm.payment_markup(invoice_url, invoice_id)
         msg_text = tt.complete_payment
-        await update_menu_text(callback.message, markup, msg_text)'''
+        await update_menu_text(callback.message, markup, msg_text)
 
     if action == "back":
         markup = rm.main_menu_markup(usr.User(callback.from_user.id))
         msg_text = tt.greeting
         await update_menu_text(callback.message, markup, msg_text)
+
+    await callback.answer()
 
 
 # Place Order
@@ -1213,6 +1211,30 @@ async def get_user_home_address(message: types.Message, state: FSMContext):
 
     await state.update_data(pr_message_id=msg.message_id)
     await state.set_state(sh.CustomerStates.payment)
+
+
+# Check Payment
+@dp.callback_query(F.data.startswith("payment_"))
+async def payment_check(callback: types.CallbackQuery, state: FSMContext):
+    invoice_id = int(callback.data.split("_")[1])
+    status = await cp.CryptoPay.get_status(invoice_id)
+
+    if status == "active":
+        await callback.answer("⌚️ We have not received your payment yet")
+    elif status == "paid":
+        data = await state.get_data()
+        user = usr.User(callback.from_user.id)
+
+        while True:
+            order_id = randint(100000, 999999)
+            if not ordr.order_exists(order_id):
+                break
+        ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
+        for item in user.get_cart():
+            user.remove_from_cart(item.get_id())
+        await state.clear()
+
+        await callback.answer("✅ Successful payment, we processing your order!")
 
 
 if __name__ == "__main__":

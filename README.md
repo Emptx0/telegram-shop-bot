@@ -26,4 +26,4 @@ python installer.py
 pyrhon main.py
 ```
 ## !
-As default bot use cryptopay test network. To switch to main network you need to change `network=Networks.TEST_NET` to `network=Networks.MAIN_NET` in line 9 `cryptopay.py` file.
+Bot use cryptopay test network as default. To switch to main network you need to change `network=Networks.TEST_NET` to `network=Networks.MAIN_NET` in line 9 `cryptopay.py` file.

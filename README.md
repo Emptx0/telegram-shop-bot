@@ -1,4 +1,4 @@
-# Telegram shop bot
+# Telegram shop bot 🛒
 This bot allows you to create your own shop in Telegram with crypto payments support.
 
 ![2024-09-03_17-08-34](https://github.com/user-attachments/assets/2b590fed-a125-4764-83ed-3740fa5c6875)

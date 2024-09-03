@@ -1,13 +1,13 @@
 # Telegram shop bot
 This bot allows you to create your own shop in Telegram with crypto payments support.
 
-## Installation with Docker
+## Installation with Docker 🐳
 Before running you need to have installed [Docker](https://docs.docker.com/get-started/get-docker/) first, then run the following command:<br/>
 ```
 docker run -e BOT_TOKEN='your bot token' -e CRYPTOPAY_TOKEN='your cryptopay token' -e MAIN_ADMIN_ID='your telegram id' emptx0/tg_shop
 ```
 
-## Manual installation
+## Manual installation ⚙️
 To run this bot you need to install [Python version 3.12](https://www.python.org/downloads/) or higher.</br>
 ### Installation:
 ```

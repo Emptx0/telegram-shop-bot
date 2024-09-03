@@ -1,5 +1,3 @@
-import re
-
 from aiogram import types
 
 import text_templates as tt

@@ -13,7 +13,7 @@ class User:
     def __init__(self, user_id, username=None):
         self.__user_id = user_id
 
-        if not user_exists(self.__user_id):
+        if not user_exist(self.__user_id):
             cursor.execute(
                 f"INSERT INTO users VALUES (?, ?, ?, ?, ?)",
                 [self.get_id(), username, 1 if str(self.get_id()) == config.get_main_admin_id() else 0, 0, "None"]
@@ -87,6 +87,6 @@ class User:
             connection.commit()
 
 
-def user_exists(user_id) -> bool:
+def user_exist(user_id) -> bool:
     cursor.execute("SELECT * FROM users WHERE user_id=?", [user_id])
     return len(list(cursor)) != 0

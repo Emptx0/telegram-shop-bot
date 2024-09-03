@@ -1,7 +1,8 @@
-from os import remove, mkdir, rmdir, listdir
-from os.path import exists
-
 import sqlite3
+
+from os import remove, mkdir, rmdir, listdir, environ
+from os.path import exists
+from sys import argv
 
 
 def create_config(token, cryptopay_token, main_admin_id, config_path="config.ini"):
@@ -77,6 +78,22 @@ def files_exist():
 
 
 if __name__ == "__main__":
+    if "--nointeract" in argv:
+        if files_exist():
+            exit(0)
+
+        token = environ.get("BOT_TOKEN")
+        cryptopay_token = environ.get("CRYPTOPAY_TOKEN")
+        main_admin_id = environ.get("MAIN_ADMIN_ID")
+        if token is None or cryptopay_token is None or main_admin_id is None:
+            print("Please provide all the necessary environment variables.")
+            exit(1)
+
+        create_config(token, cryptopay_token, main_admin_id)
+        create_db()
+        exit(0)
+
+
     if files_exist():
         while True:
             conf = input(

@@ -731,7 +731,7 @@ async def user_management(message: types.Message, state: FSMContext):
     user_id = message.text
     data = await state.get_data()
 
-    if usr.user_exists(user_id):
+    if usr.user_exist(user_id):
         selected_user = usr.User(user_id)
         admin = usr.User(message.from_user.id)
         markup = rm.user_management_markup(selected_user, admin.is_main_admin())
@@ -1227,7 +1227,7 @@ async def payment_check(callback: types.CallbackQuery, state: FSMContext):
 
         while True:
             order_id = randint(100000, 999999)
-            if not ordr.order_exists(order_id):
+            if not ordr.order_exist(order_id):
                 break
         ordr.create_order(order_id, user.get_id(), user.get_cart_comma(), data["email_address"], data["home_address"])
         for item in user.get_cart():

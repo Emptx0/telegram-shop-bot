@@ -81,7 +81,7 @@ def get_status_dict():
     }
 
 
-def order_exists(order_id) -> bool:
+def order_exist(order_id) -> bool:
     cursor.execute("SELECT * FROM orders WHERE user_id=?", [order_id])
     return len(list(cursor)) != 0
 
